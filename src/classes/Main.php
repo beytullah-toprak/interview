@@ -1,6 +1,6 @@
 <?php
 
-require_once 'home.php';
+require_once __DIR__ . '/Home.php';
 
 class Main
 {
