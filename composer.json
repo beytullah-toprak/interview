@@ -13,7 +13,6 @@
 	],
 	"require": {
 		"smarty/smarty": "^5.0",
-		"aura/router": "^3.3",
 		"bramus/router": "^1.6",
 		"vlucas/phpdotenv": "^5.6"
 	}
