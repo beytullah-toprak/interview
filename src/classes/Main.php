@@ -10,7 +10,7 @@ class Main
     {
         global $lang, $smarty;
 
-        $lang = $_SESSION['lang'] ? $_SESSION['lang'] : 'tr';
+        $lang = $_SESSION['lang'] ?? 'tr';
 
         if (isset($_GET['lang'])) {
             $lang = $_GET['lang'];
