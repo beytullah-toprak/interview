@@ -4,17 +4,24 @@ require_once __DIR__ . '/Home.php';
 
 class Main
 {
+    /** Desteklenen diller. $_GET['lang'] doğrudan dosya yoluna girdiği için whitelist şart. */
+    private const SUPPORTED_LANGS = ['tr', 'en'];
+    private const DEFAULT_LANG = 'tr';
+
     public $router;
 
     public function __construct()
     {
         global $lang, $smarty;
 
-        // Dil tercihini session'dan oku, yoksa varsayılan 'tr'
-        $lang = $_SESSION['lang'] ?? 'tr';
+        // Dil tercihini session'dan oku, yoksa varsayılan.
+        // Whitelist dışındaki her değer (session'dan da gelse) yok sayılır:
+        // aksi halde geçersiz bir ?lang session'a yazılıp sonraki tüm
+        // istekleri de kırardı.
+        $lang = $this->resolveLang($_SESSION['lang'] ?? null);
 
         if (isset($_GET['lang'])) {
-            $lang = $_GET['lang'];
+            $lang = $this->resolveLang($_GET['lang']);
             $_SESSION['lang'] = $lang;
         }
 
@@ -25,6 +32,10 @@ class Main
 
         $smarty->setTemplateDir('src/templates');
         $smarty->setCompileDir('/tmp');
+
+        // Oyun/ürün adları harici API'den geliyor; template'te otomatik HTML
+        // escape ederek XSS riskini tek yerde kapatıyoruz.
+        $smarty->setEscapeHtml(true);
 
         $smarty->assign('LANG', $lang);
         // JS tarafında SweetAlert2 mesajlarını localize etmek için (window.LANG olarak kullanılır)
@@ -38,6 +49,11 @@ class Main
         $smarty->registerPlugin('function', 'asset', function ($params) {
             return \Turkpin\InterviewTest\Helpers\AssetHelper::url($params['path']);
         });
+    }
+
+    private function resolveLang(?string $candidate): string
+    {
+        return in_array($candidate, self::SUPPORTED_LANGS, true) ? $candidate : self::DEFAULT_LANG;
     }
 
     public function run()
