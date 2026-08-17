@@ -13,7 +13,6 @@ $lang = [
     'quantity' => 'Miktar',
     'price' => 'Birim Fiyat',
     'line_total' => 'Tutar',
-    // API tutarları TL cinsinden dönüyor; sembol iki dilde de aynı.
     'currency' => '₺',
     'buy' => 'Satın Al',
     'warning' => 'Uyarı',

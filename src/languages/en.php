@@ -13,13 +13,12 @@ $lang = [
     'quantity' => 'Quantity',
     'price' => 'Unit Price',
     'line_total' => 'Total',
-    // API tutarları TL cinsinden dönüyor; sembol iki dilde de aynı.
     'currency' => '₺',
     'buy' => 'Buy',
     'warning' => 'Warning',
     'error' => 'Error',
     'ok' => 'OK',
-
+    
     // Game / product list
     'select_game' => 'Select Game',
     'pre_order' => 'Pre-Order',

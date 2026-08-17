@@ -15,10 +15,7 @@ class Main
     {
         global $lang, $smarty;
 
-        // Dil tercihini session'dan oku, yoksa varsayılan.
-        // Whitelist dışındaki her değer (session'dan da gelse) yok sayılır:
-        // aksi halde geçersiz bir ?lang session'a yazılıp sonraki tüm
-        // istekleri de kırardı.
+        // Dil tercihi session'dan okunur, yoksa varsayılan dil kullanılır
         $lang = $this->resolveLang($_SESSION['lang'] ?? null);
 
         if (isset($_GET['lang'])) {
@@ -34,11 +31,11 @@ class Main
         $smarty->setTemplateDir('src/templates');
         $smarty->setCompileDir('/tmp');
 
-        // Oyun/ürün adları harici API'den geliyor; template'te otomatik HTML
-        // escape ederek XSS riskini tek yerde kapatıyoruz.
+        // Oyun/ürün adları harici API'den geliyor; template'te otomatik HTML escape edilerek XSS riski tek yerde kapatılır
         $smarty->setEscapeHtml(true);
 
         $smarty->assign('LANG', $lang);
+
         // JS tarafında SweetAlert2 mesajlarını localize etmek için (window.LANG olarak kullanılır)
         $smarty->assign('LANG_JSON', json_encode($lang, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $smarty->assign('langs', ['tr' => 'Türkçe', 'en' => 'English']);
@@ -66,23 +63,22 @@ class Main
     {
         global $smarty;
 
-        // Ana sayfa - oyun/ürün listesini gösterir
+        // Ana sayfa
         $this->router->get('/', function () {
             (new Home())->index();
         });
 
-        // Sipariş uçları - işin kendisi Order'da (bkz. Order.php)
+        // Sipariş token oluşturma
         $this->router->get('/order-token', function () {
             (new Order())->issueToken();
         });
 
+        // Sipariş oluşturma
         $this->router->post('/order', function () {
             (new Order())->create();
         });
 
-        // Tanımsız adresler: daha önce bomboş sayfa dönüyordu (router hiçbir
-        // route eşleşmeyince şablona bir şey atanmıyordu). Artık 404 durum
-        // koduyla birlikte açıklayıcı bir sayfa gösteriliyor.
+        // 404 sayfası
         $this->router->set404(function () use ($smarty) {
             http_response_code(404);
             $smarty->assign('template', '404.html');

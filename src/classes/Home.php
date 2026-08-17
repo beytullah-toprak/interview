@@ -23,8 +23,8 @@ class Home
 
         $selectedGameId = $_GET['game_id'] ?? null;
         $smarty->assign('game', $selectedGameId ? (int) $selectedGameId : 0);
-        $smarty->assign('template', 'home.html');
 
+        // Oyun listesi
         $gameResult = $this->gameService->getGames();
 
         if (!$gameResult['success']) {
@@ -34,6 +34,7 @@ class Home
             return;
         }
 
+        // Ürün listesi
         $products = [];
         if ($selectedGameId) {
             $productResult = $this->productService->getProducts($selectedGameId);
@@ -46,5 +47,7 @@ class Home
 
         $smarty->assign('games', $gameResult['games']);
         $smarty->assign('products', $products);
+
+        $smarty->assign('template', 'home.html');
     }
 }

@@ -6,9 +6,9 @@ function fireAlert(options) {
 }
 
 /**
- * Tutarları biçimlendirir. Test API'sinde 0.001 gibi çok küçük birim fiyatlar
- * da dönüyor; sabit 2 basamak bunları "0.00" gösterip yanıltıcı olurdu, bu
- * yüzden 2-4 basamak aralığı kullanılıyor.
+ * Tutarları biçimlendirir.
+ * @param {number} value - Tutar değeri
+ * @returns {string} Biçimlenmiş tutar
  */
 function formatAmount(value) {
     const L = window.LANG || {};
@@ -20,7 +20,7 @@ function formatAmount(value) {
     return formatted + ' ' + (L.currency || '');
 }
 
-/** Bir satırın "adet x birim fiyat" tutarını hesaplayıp hücresine yazar. */
+/** Toplam fiyat güncelleme */
 function updateLineTotal(quantityInput) {
     const target = document.getElementById(quantityInput.dataset.totalTarget);
     if (!target) {
@@ -30,13 +30,14 @@ function updateLineTotal(quantityInput) {
     const price = parseFloat(quantityInput.dataset.price);
     const quantity = parseInt(quantityInput.value, 10);
 
-    // Adet 0 ise (stokta yok) tutar da 0 gösterilir; yalnızca alan tamamen
+    // Adet 0 ise stokta yok tutar da 0 gösterilir; yalnızca alan tamamen
     // boş/geçersizken tire basılır.
     target.textContent = (isNaN(price) || isNaN(quantity) || quantity < 0)
         ? '-'
         : formatAmount(price * quantity);
 }
 
+/* Sipariş oluşturma işlemi */
 function addProducts(productId, gameId, button) {
     const L = window.LANG || {};
     const quantityInput = document.getElementById('quantity_' + productId);
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fireAlert({ icon: 'error', title: (window.LANG || {}).error, text: errorBox.dataset.message });
     }
 
-    // Oyun değişimi sayfayı yeniden yüklüyor; kullanıcıya bekleme geri bildirimi ver.
+    // Oyun değişimi sayfayı yeniden yüklüyor; kullanıcıya bekleme geri bildirimi vert
     // setTimeout: disabled bir select form verisine dahil edilmez, bu yüzden
     // devre dışı bırakmayı form serialize edildikten sonraki tick'e erteliyoruz.
     const gameSelect = document.getElementById('games');

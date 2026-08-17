@@ -1,9 +1,3 @@
-/* ---------------------------------------------------------------------------
-   Turkpin marka paleti
-   Renkler turkpin.com'un kullandığı skaladan alındı: baskın kırmızı (#EF1414),
-   hover için koyu kırmızı (#D20707), koyu gri/siyah yüzeyler ve nötr griler.
-   Tek yerde tanımlanıp aşağıdaki Bootstrap override'larında kullanılıyor.
-   --------------------------------------------------------------------------- */
 :root {
     --tp-primary: #ef1414;
     --tp-primary-dark: #d20707;
@@ -16,7 +10,7 @@
     --tp-surface: #ffffff;
     --tp-body-bg: #f7f7f8;
 
-    /* Bootstrap'in kendi değişkenlerini markaya çekiyoruz */
+    /* Bootstrap'in kendi değişkenlerini kullanıyoruz */
     --bs-primary: var(--tp-primary);
     --bs-primary-rgb: 239, 20, 20;
     --bs-link-color: var(--tp-primary);
@@ -40,24 +34,8 @@ body {
     letter-spacing: -0.02em;
 }
 
-/* Marka adının sonundaki kırmızı nokta: turkpin.com'daki kırmızı vurgunun
-   yalın bir karşılığı. */
-.navbar-brand::after {
-    content: "";
-    display: inline-block;
-    width: 0.4rem;
-    height: 0.4rem;
-    margin-left: 0.35rem;
-    border-radius: 50%;
-    background-color: var(--tp-primary);
-    vertical-align: middle;
-}
-
 /* --- Butonlar ----------------------------------------------------------- */
 
-/* "Satın Al" olumlu bir eylem; dolu kırmızı bir buton tabloda tekrar edince
-   uyarı/silme gibi okunuyordu. Bu yüzden buton koyu marka rengiyle çiziliyor,
-   kırmızı ise hover/aktif durumda vurgu olarak devreye giriyor. */
 .btn-primary {
     --bs-btn-bg: var(--tp-dark);
     --bs-btn-border-color: var(--tp-dark);
@@ -106,18 +84,14 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
-/* Fiyat sütunu sağa yaslı; eşit genişlikli rakamlarla alt alta hizalanınca
-   karşılaştırması kolaylaşıyor. */
 .tp-price {
     font-variant-numeric: tabular-nums;
     color: var(--tp-dark);
 }
 
-/* --- Rozetler ----------------------------------------------------------- */
+/* --- Badge ----------------------------------------------------------- */
 
-/* Bootstrap'in text-bg-* rozetleri (danger kırmızı, info açık mavi + siyah
-   yazı) hem markayla çakışıyor hem kontrastı zayıftı. Yerine yumuşak zeminli,
-   ince çerçeveli kendi rozetlerimiz. */
+
 .tp-badge {
     display: inline-block;
     padding: 0.25em 0.6em;
@@ -129,14 +103,13 @@ body {
     white-space: nowrap;
 }
 
-/* "Stokta Yok" bir hata değil, sadece bir durum: nötr gri. */
 .tp-badge-muted {
     background-color: #f1f2f4;
     border-color: #dcdee1;
     color: #5b6167;
 }
 
-/* "Ön Sipariş" bilgilendirici bir etiket: marka kırmızısının yumuşak tonu. */
+
 .tp-badge-preorder {
     background-color: var(--tp-primary-soft);
     border-color: rgba(239, 20, 20, 0.25);
@@ -157,18 +130,12 @@ body {
     color: var(--tp-primary);
 }
 
-/* Miktar alanı içeriğe göre gereğinden geniş açılmasın */
 .table input[type="number"] {
     max-width: 6rem;
 }
 
 /* --- Mobil -------------------------------------------------------------- */
 
-/* Mobilde 8 sütunluk tablo ekrana sığmıyor; yatay kaydırmaya düşünce
-   "Satın Al" butonu görünmez oluyordu. Çözüm: HTML tablo yapısını
-   (README "mevcut tablo yapısı" istiyor) olduğu gibi bırakıp, dar
-   ekranlarda satırları CSS ile karta dönüştürmek. Sütun başlıkları
-   her hücrenin data-label değerinden ::before ile basılıyor. */
 @media (max-width: 767.98px) {
     .tp-panel .table thead {
         display: none;
@@ -206,7 +173,6 @@ body {
         color: var(--tp-muted);
     }
 
-    /* Ürün adı kartın başlığı: etiketsiz ve tam genişlik */
     .tp-panel .table td.tp-product-name {
         display: block;
         font-weight: 600;
@@ -222,7 +188,6 @@ body {
         max-width: 7rem;
     }
 
-    /* Buton kartın altında tam genişlik dursun */
     .tp-panel .table td.tp-buy-cell {
         display: block;
         margin-top: 0.5rem;
