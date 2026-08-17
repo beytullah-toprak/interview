@@ -1,9 +1,11 @@
+/* Sipariş oluşturma - "Satın Al" butonuna basılınca çalışır */
+
 function addProducts(productId, gameId) {
     const quantityInput = document.getElementById('quantity_' + productId);
     const quantity = quantityInput ? parseInt(quantityInput.value, 10) : 0;
 
     if (!quantity || quantity < 1) {
-        alert('Lütfen geçerli bir adet girin.');
+        Swal.fire({ icon: 'warning', title: 'Uyarı', text: 'Lütfen geçerli bir adet girin.' });
         return;
     }
 
@@ -16,10 +18,20 @@ function addProducts(productId, gameId) {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                alert('Sipariş Başarılı! Sipariş No: ' + result.order.order_no);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sipariş Başarılı',
+                    html: 'Sipariş No: <b>' + result.order.order_no + '</b><br>Tutar: ' + result.order.total
+                });
             } else {
-                alert('Sipariş Başarısız: ' + (result.error_message || result.message));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Sipariş Başarısız',
+                    text: result.error_message || result.message || 'Bir hata oluştu.'
+                });
             }
         })
-        .catch(() => alert('Sunucuya ulaşılamadı.'));
+        .catch(() => {
+            Swal.fire({ icon: 'error', title: 'Hata', text: 'Sunucuya ulaşılamadı.' });
+        });
 }

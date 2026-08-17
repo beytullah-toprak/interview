@@ -13,4 +13,13 @@ $lang = [
     'quantity' => 'Miktar',
     'price' => 'Fiyat',
     'buy' => 'Satın Al',
+    'error' => 'Hata',
+    'warning' => 'Uyarı',
+    'success' => 'Başarılı',
+    'error_message' => 'Hata mesajı',
+    'warning_message' => 'Uyarı mesajı',
+    'success_message' => 'Başarılı mesajı',
+    'error_title' => 'Hata',
+    'warning_title' => 'Uyarı',
+    'success_title' => 'Başarılı',
 ];
