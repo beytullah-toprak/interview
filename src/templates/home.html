@@ -19,11 +19,11 @@
                 <thead class="table-dark">
                     <tr>
                         <th scope="col">{$LANG.prd_name}</th>
-                        <th scope="col" class="text-nowrap">{$LANG.stock}</th>
-                        <th scope="col" class="text-nowrap d-none d-md-table-cell">{$LANG.min_order}</th>
-                        <th scope="col" class="text-nowrap d-none d-md-table-cell">{$LANG.max_order}</th>
-                        <th scope="col" class="text-nowrap">{$LANG.price}</th>
-                        <th scope="col">{$LANG.quantity}</th>
+                        <th scope="col" class="text-nowrap text-center">{$LANG.stock}</th>
+                        <th scope="col" class="text-nowrap text-center d-none d-md-table-cell">{$LANG.min_order}</th>
+                        <th scope="col" class="text-nowrap text-center d-none d-md-table-cell">{$LANG.max_order}</th>
+                        <th scope="col" class="text-nowrap text-end">{$LANG.price}</th>
+                        <th scope="col" class="text-center">{$LANG.quantity}</th>
                         <th scope="col" class="text-nowrap text-end">{$LANG.line_total}</th>
                         <th scope="col"></th>
                     </tr>
@@ -36,25 +36,28 @@
                             <td class="tp-product-name">
                                 {$product.name}
                                 {if $product.pre_order}
-                                    <span class="badge text-bg-info ms-1">{$LANG.pre_order}</span>
+                                    <span class="tp-badge tp-badge-preorder ms-1">{$LANG.pre_order}</span>
                                 {/if}
                             </td>
-                            <td data-label="{$LANG.stock}">
+                            <td class="text-center" data-label="{$LANG.stock}">
                                 {if $product.stock <= 0}
-                                    <span class="badge text-bg-danger">{$LANG.out_of_stock}</span>
+                                    <span class="tp-badge tp-badge-muted">{$LANG.out_of_stock}</span>
                                 {else}
                                     {$product.stock}
                                 {/if}
                             </td>
-                            <td class="d-none d-md-table-cell" data-label="{$LANG.min_order}">{$product.min_order}</td>
-                            <td class="d-none d-md-table-cell" data-label="{$LANG.max_order}">
+                            <td class="text-center d-none d-md-table-cell" data-label="{$LANG.min_order}">{$product.min_order}</td>
+                            <td class="text-center d-none d-md-table-cell" data-label="{$LANG.max_order}">
                                 {if $product.max_order > 0}{$product.max_order}{else}<span class="text-muted">{$LANG.unlimited}</span>{/if}
                             </td>
-                            <td class="text-nowrap" data-label="{$LANG.price}">{$product.price}</td>
-                            <td data-label="{$LANG.quantity}">
+                            <td class="tp-price text-nowrap text-end" data-label="{$LANG.price}">{$product.price|money}</td>
+                            <td class="text-center" data-label="{$LANG.quantity}">
+                                {* Stokta yoksa adet 0 gösterilir; alan zaten disabled olduğu
+                                   için sipariş edilemez ve satır tutarı da 0 çıkar. *}
                                 {* data-price: adet değişince satır tutarını JS tarafında hesaplamak için *}
                                 <input name="quantity" type="number" class="form-control"
-                                    value="{$product.min_order}" min="{$product.min_order}"
+                                    value="{if $product.stock <= 0}0{else}{$product.min_order}{/if}"
+                                    min="{$product.min_order}"
                                     {if $product.max_order > 0}max="{$product.max_order}"{/if}
                                     id="quantity_{$product.id}"
                                     data-price="{$product.price}"
