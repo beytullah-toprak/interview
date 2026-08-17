@@ -1,5 +1,104 @@
+/* ---------------------------------------------------------------------------
+   Turkpin marka paleti
+   Renkler turkpin.com'un kullandığı skaladan alındı: baskın kırmızı (#EF1414),
+   hover için koyu kırmızı (#D20707), koyu gri/siyah yüzeyler ve nötr griler.
+   Tek yerde tanımlanıp aşağıdaki Bootstrap override'larında kullanılıyor.
+   --------------------------------------------------------------------------- */
+:root {
+    --tp-primary: #ef1414;
+    --tp-primary-dark: #d20707;
+    --tp-primary-darker: #b00606;
+    --tp-primary-soft: rgba(239, 20, 20, 0.1);
+    --tp-dark: #1a1d20;
+    --tp-dark-soft: #262b30;
+    --tp-muted: #ababab;
+    --tp-border: #e7e7e7;
+    --tp-surface: #ffffff;
+    --tp-body-bg: #f7f7f8;
+
+    /* Bootstrap'in kendi değişkenlerini markaya çekiyoruz */
+    --bs-primary: var(--tp-primary);
+    --bs-primary-rgb: 239, 20, 20;
+    --bs-link-color: var(--tp-primary);
+    --bs-link-hover-color: var(--tp-primary-dark);
+    --bs-border-color: var(--tp-border);
+}
+
+body {
+    background-color: var(--tp-body-bg);
+}
+
+/* --- Navbar ------------------------------------------------------------- */
+
+.navbar.bg-dark {
+    background-color: var(--tp-dark) !important;
+    border-bottom: 3px solid var(--tp-primary);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* Marka adının sonundaki kırmızı nokta: turkpin.com'daki kırmızı vurgunun
+   yalın bir karşılığı. */
+.navbar-brand::after {
+    content: "";
+    display: inline-block;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: 0.35rem;
+    border-radius: 50%;
+    background-color: var(--tp-primary);
+    vertical-align: middle;
+}
+
+/* --- Butonlar ----------------------------------------------------------- */
+
+.btn-primary {
+    --bs-btn-bg: var(--tp-primary);
+    --bs-btn-border-color: var(--tp-primary);
+    --bs-btn-hover-bg: var(--tp-primary-dark);
+    --bs-btn-hover-border-color: var(--tp-primary-dark);
+    --bs-btn-active-bg: var(--tp-primary-darker);
+    --bs-btn-active-border-color: var(--tp-primary-darker);
+    --bs-btn-disabled-bg: var(--tp-primary);
+    --bs-btn-disabled-border-color: var(--tp-primary);
+    font-weight: 600;
+}
+
+/* --- Form alanları ------------------------------------------------------ */
+
+.form-select:focus,
+.form-control:focus {
+    border-color: var(--tp-primary);
+    box-shadow: 0 0 0 0.2rem var(--tp-primary-soft);
+}
+
+/* --- Kartlar / tablo ---------------------------------------------------- */
+
+.tp-panel {
+    background-color: var(--tp-surface);
+    border: 1px solid var(--tp-border);
+    border-radius: 0.75rem;
+}
+
+.table thead.table-dark {
+    --bs-table-bg: var(--tp-dark);
+}
+
 .table td {
     vertical-align: middle;
+}
+
+/* Tablo köşelerinin .tp-panel yuvarlaklığının dışına taşmasını engelle */
+.tp-panel > .table-responsive {
+    border-radius: inherit;
+}
+
+.tp-line-total {
+    font-weight: 600;
+    color: var(--tp-dark);
 }
 
 /* Miktar alanı içeriğe göre gereğinden geniş açılmasın */
@@ -7,23 +106,69 @@
     max-width: 6rem;
 }
 
-/* Mobilde tablo yatay kaydırmaya düşüyor; hücreleri sıkıştırarak
-   "Satın Al" butonunun ekranda kalmasını sağlıyoruz. */
+/* --- Mobil -------------------------------------------------------------- */
+
+/* Mobilde 8 sütunluk tablo ekrana sığmıyor; yatay kaydırmaya düşünce
+   "Satın Al" butonu görünmez oluyordu. Çözüm: HTML tablo yapısını
+   (README "mevcut tablo yapısı" istiyor) olduğu gibi bırakıp, dar
+   ekranlarda satırları CSS ile karta dönüştürmek. Sütun başlıkları
+   her hücrenin data-label değerinden ::before ile basılıyor. */
 @media (max-width: 767.98px) {
-    .table > :not(caption) > * > * {
-        padding: 0.4rem 0.35rem;
+    .tp-panel .table thead {
+        display: none;
     }
 
-    .table {
-        font-size: 0.875rem;
+    .tp-panel .table,
+    .tp-panel .table tbody,
+    .tp-panel .table tr,
+    .tp-panel .table td {
+        display: block;
+        width: 100%;
     }
 
-    .table input[type="number"] {
-        max-width: 3.75rem;
-        padding: 0.25rem 0.4rem;
+    .tp-panel .table tr {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--tp-border);
     }
 
-    .table .badge {
-        font-size: 0.65rem;
+    .tp-panel .table tr:last-child {
+        border-bottom: 0;
+    }
+
+    .tp-panel .table td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.25rem 0;
+        border: 0;
+    }
+
+    .tp-panel .table td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--tp-muted);
+    }
+
+    /* Ürün adı kartın başlığı: etiketsiz ve tam genişlik */
+    .tp-panel .table td.tp-product-name {
+        display: block;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .tp-panel .table td.tp-line-total {
+        text-align: right;
+    }
+
+    .tp-panel .table input[type="number"] {
+        max-width: 7rem;
+    }
+
+    /* Buton kartın altında tam genişlik dursun */
+    .tp-panel .table td.tp-buy-cell {
+        display: block;
+        margin-top: 0.5rem;
     }
 }
