@@ -55,15 +55,19 @@ body {
 
 /* --- Butonlar ----------------------------------------------------------- */
 
+/* "Satın Al" olumlu bir eylem; dolu kırmızı bir buton tabloda tekrar edince
+   uyarı/silme gibi okunuyordu. Bu yüzden buton koyu marka rengiyle çiziliyor,
+   kırmızı ise hover/aktif durumda vurgu olarak devreye giriyor. */
 .btn-primary {
-    --bs-btn-bg: var(--tp-primary);
-    --bs-btn-border-color: var(--tp-primary);
-    --bs-btn-hover-bg: var(--tp-primary-dark);
-    --bs-btn-hover-border-color: var(--tp-primary-dark);
-    --bs-btn-active-bg: var(--tp-primary-darker);
-    --bs-btn-active-border-color: var(--tp-primary-darker);
-    --bs-btn-disabled-bg: var(--tp-primary);
-    --bs-btn-disabled-border-color: var(--tp-primary);
+    --bs-btn-bg: var(--tp-dark);
+    --bs-btn-border-color: var(--tp-dark);
+    --bs-btn-hover-bg: var(--tp-primary);
+    --bs-btn-hover-border-color: var(--tp-primary);
+    --bs-btn-active-bg: var(--tp-primary-dark);
+    --bs-btn-active-border-color: var(--tp-primary-dark);
+    --bs-btn-disabled-bg: var(--tp-muted);
+    --bs-btn-disabled-border-color: var(--tp-muted);
+    --bs-btn-disabled-color: #fff;
     font-weight: 600;
 }
 
@@ -99,6 +103,58 @@ body {
 .tp-line-total {
     font-weight: 600;
     color: var(--tp-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Fiyat sütunu sağa yaslı; eşit genişlikli rakamlarla alt alta hizalanınca
+   karşılaştırması kolaylaşıyor. */
+.tp-price {
+    font-variant-numeric: tabular-nums;
+    color: var(--tp-dark);
+}
+
+/* --- Rozetler ----------------------------------------------------------- */
+
+/* Bootstrap'in text-bg-* rozetleri (danger kırmızı, info açık mavi + siyah
+   yazı) hem markayla çakışıyor hem kontrastı zayıftı. Yerine yumuşak zeminli,
+   ince çerçeveli kendi rozetlerimiz. */
+.tp-badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* "Stokta Yok" bir hata değil, sadece bir durum: nötr gri. */
+.tp-badge-muted {
+    background-color: #f1f2f4;
+    border-color: #dcdee1;
+    color: #5b6167;
+}
+
+/* "Ön Sipariş" bilgilendirici bir etiket: marka kırmızısının yumuşak tonu. */
+.tp-badge-preorder {
+    background-color: var(--tp-primary-soft);
+    border-color: rgba(239, 20, 20, 0.25);
+    color: var(--tp-primary-dark);
+}
+
+/* --- 404 ---------------------------------------------------------------- */
+
+.tp-notfound {
+    padding: 3rem 1rem;
+}
+
+.tp-notfound-code {
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    color: var(--tp-primary);
 }
 
 /* Miktar alanı içeriğe göre gereğinden geniş açılmasın */
