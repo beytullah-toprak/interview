@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/Home.php';
-require_once __DIR__ . '/OrderController.php';
+require_once __DIR__ . '/Order.php';
 
 class Main
 {
@@ -50,6 +50,11 @@ class Main
         $smarty->registerPlugin('function', 'asset', function ($params) {
             return \Turkpin\InterviewTest\Helpers\AssetHelper::url($params['path']);
         });
+
+        // Template'lerde {$product.price|money} olarak kullanılır
+        $smarty->registerPlugin('modifier', 'money', function ($amount) use ($lang) {
+            return \Turkpin\InterviewTest\Helpers\MoneyHelper::format((float) $amount, $lang['lang']);
+        });
     }
 
     private function resolveLang(?string $candidate): string
@@ -66,13 +71,21 @@ class Main
             (new Home())->index();
         });
 
-        // Sipariş uçları - işin kendisi OrderController'da (bkz. OrderController.php)
+        // Sipariş uçları - işin kendisi Order'da (bkz. Order.php)
         $this->router->get('/order-token', function () {
-            (new OrderController())->issueToken();
+            (new Order())->issueToken();
         });
 
         $this->router->post('/order', function () {
-            (new OrderController())->create();
+            (new Order())->create();
+        });
+
+        // Tanımsız adresler: daha önce bomboş sayfa dönüyordu (router hiçbir
+        // route eşleşmeyince şablona bir şey atanmıyordu). Artık 404 durum
+        // koduyla birlikte açıklayıcı bir sayfa gösteriliyor.
+        $this->router->set404(function () use ($smarty) {
+            http_response_code(404);
+            $smarty->assign('template', '404.html');
         });
 
         $this->router->run();
