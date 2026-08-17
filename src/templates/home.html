@@ -27,15 +27,26 @@
                 {foreach $products as $product}
                     <tr>
                         <td>{$product.name}</td>
-                        <td>{$product.stock}</td>
+                        <td>
+                            {if $product.stock <= 0}
+                                <span class="badge bg-danger">Stokta Yok</span>
+                            {else}
+                                {$product.stock}
+                            {/if}
+                        </td>
                         <td>{$product.price}</td>
                         <td>
-                            <input name="quantity" type="number" class="form-control" value="{$product.min_order}"
-                                min="{$product.min_order}" max="{$product.max_order}" id="quantity_{$product.id}">
+                            <input name="quantity" type="number" class="form-control"
+                                value="{$product.min_order}" min="{$product.min_order}"
+                                max="{$product.max_order}" id="quantity_{$product.id}"
+                                {if $product.stock <= 0}disabled{/if}>
                         </td>
                         <td>
                             <button type="button" class="btn btn-primary btn-sm"
-                                onclick="addProducts('{$product.id}')">{$LANG.buy}</button>
+                                onclick="addProducts('{$product.id}', '{$game}')"
+                                {if $product.stock <= 0}disabled{/if}>
+                                {$LANG.buy}
+                            </button>
                         </td>
                     </tr>
                 {/foreach}
