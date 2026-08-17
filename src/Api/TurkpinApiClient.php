@@ -33,6 +33,23 @@ class TurkpinApiClient
     }
 
     /**
+     * .env dosyasındaki TURKPIN_API_URL / TURKPIN_API_USERNAME / TURKPIN_API_PASSWORD
+     * değerlerinden otomatik olarak bir client oluşturur.
+     *
+     * Bu metod olmadan her route/sınıfta ($_ENV['TURKPIN_API_URL'] gibi) aynı
+     * satırlar tekrar tekrar yazılıyordu (DRY ihlali). Artık credential okuma
+     * mantığı tek yerde: TurkpinApiClient::fromEnv() çağırmak yeterli.
+     */
+    public static function fromEnv(): self
+    {
+        return new self(
+            $_ENV['TURKPIN_API_URL'],
+            $_ENV['TURKPIN_API_USERNAME'],
+            $_ENV['TURKPIN_API_PASSWORD']
+        );
+    }
+
+    /**
      * API'ye tek bir istek atar ve standartlaştırılmış bir sonuç döner.
      *
      * @param string $cmd    Turkpin API komutu, örn: epinOyunListesi, epinUrunleri, epinSiparisYarat
