@@ -31,6 +31,11 @@ $lang = [
     'games_fetch_error' => 'Oyun listesi alınamadı: ',
     'products_fetch_error' => 'Ürünler alınamadı: ',
 
+    // 404
+    'not_found_title' => 'Sayfa Bulunamadı',
+    'not_found_text' => 'Aradığınız sayfa mevcut değil veya taşınmış olabilir.',
+    'back_home' => 'Ana Sayfaya Dön',
+
     // Sipariş sonucu (SweetAlert2 modalı)
     'order_success' => 'Sipariş Başarılı',
     'order_failed' => 'Sipariş Başarısız',

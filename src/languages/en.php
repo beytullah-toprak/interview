@@ -31,6 +31,11 @@ $lang = [
     'games_fetch_error' => 'Could not fetch game list: ',
     'products_fetch_error' => 'Could not fetch products: ',
 
+    // 404
+    'not_found_title' => 'Page Not Found',
+    'not_found_text' => 'The page you are looking for does not exist or may have been moved.',
+    'back_home' => 'Back to Home',
+
     // Order result (SweetAlert2 modal)
     'order_success' => 'Order Successful',
     'order_failed' => 'Order Failed',
