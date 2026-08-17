@@ -30,7 +30,9 @@ function updateLineTotal(quantityInput) {
     const price = parseFloat(quantityInput.dataset.price);
     const quantity = parseInt(quantityInput.value, 10);
 
-    target.textContent = (isNaN(price) || isNaN(quantity) || quantity < 1)
+    // Adet 0 ise (stokta yok) tutar da 0 gösterilir; yalnızca alan tamamen
+    // boş/geçersizken tire basılır.
+    target.textContent = (isNaN(price) || isNaN(quantity) || quantity < 0)
         ? '-'
         : formatAmount(price * quantity);
 }
