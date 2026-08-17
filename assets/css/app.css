@@ -1,3 +1,29 @@
 .table td {
     vertical-align: middle;
 }
+
+/* Miktar alanı içeriğe göre gereğinden geniş açılmasın */
+.table input[type="number"] {
+    max-width: 6rem;
+}
+
+/* Mobilde tablo yatay kaydırmaya düşüyor; hücreleri sıkıştırarak
+   "Satın Al" butonunun ekranda kalmasını sağlıyoruz. */
+@media (max-width: 767.98px) {
+    .table > :not(caption) > * > * {
+        padding: 0.4rem 0.35rem;
+    }
+
+    .table {
+        font-size: 0.875rem;
+    }
+
+    .table input[type="number"] {
+        max-width: 3.75rem;
+        padding: 0.25rem 0.4rem;
+    }
+
+    .table .badge {
+        font-size: 0.65rem;
+    }
+}

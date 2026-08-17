@@ -74,4 +74,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (errorBox && errorBox.dataset.message) {
         fireAlert({ icon: 'error', title: (window.LANG || {}).error, text: errorBox.dataset.message });
     }
+
+    // Oyun değişimi sayfayı yeniden yüklüyor; kullanıcıya bekleme geri bildirimi ver.
+    // setTimeout: disabled bir select form verisine dahil edilmez, bu yüzden
+    // devre dışı bırakmayı form serialize edildikten sonraki tick'e erteliyoruz.
+    const gameSelect = document.getElementById('games');
+    if (gameSelect) {
+        gameSelect.form.addEventListener('submit', function () {
+            setTimeout(function () {
+                gameSelect.disabled = true;
+            }, 0);
+        });
+    }
 });

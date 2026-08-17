@@ -18,6 +18,10 @@ $lang = [
     'ok' => 'Tamam',
 
     // Oyun / ürün listesi
+    'select_game' => 'Oyun Seçiniz',
+    'pre_order' => 'Ön Sipariş',
+    'unlimited' => 'Sınırsız',
+    'loading' => 'Yükleniyor...',
     'out_of_stock' => 'Stokta Yok',
     'no_products_found' => 'Bu oyuna ait ürün bulunamadı.',
     'select_game_prompt' => 'Ürünleri görmek için lütfen bir oyun seçin.',

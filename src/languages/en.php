@@ -18,6 +18,10 @@ $lang = [
     'ok' => 'OK',
 
     // Game / product list
+    'select_game' => 'Select Game',
+    'pre_order' => 'Pre-Order',
+    'unlimited' => 'Unlimited',
+    'loading' => 'Loading...',
     'out_of_stock' => 'Out of Stock',
     'no_products_found' => 'No products found for this game.',
     'select_game_prompt' => 'Please select a game to view products.',
