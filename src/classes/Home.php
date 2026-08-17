@@ -11,11 +11,7 @@ class Home
 
     public function __construct()
     {
-        $client = new TurkpinApiClient(
-            $_ENV['TURKPIN_API_URL'],
-            $_ENV['TURKPIN_API_USERNAME'],
-            $_ENV['TURKPIN_API_PASSWORD']
-        );
+        $client = TurkpinApiClient::fromEnv();
 
         $this->gameService = new GameService($client);
         $this->productService = new ProductService($client);
