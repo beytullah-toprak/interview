@@ -4,4 +4,7 @@
 /.idea
 /.vscode
 /.env
+/storage/logs
+/.claude
+/.phpunit.result.cache
 .DS_Store

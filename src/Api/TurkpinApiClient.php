@@ -2,6 +2,8 @@
 
 namespace Turkpin\InterviewTest\Api;
 
+use Turkpin\InterviewTest\Helpers\Logger;
+
 /**
  * Turkpin API (https://www.turkpin.net/api.php) ile ham HTTP/XML iletişimini yöneten sınıf.
  *
@@ -74,10 +76,11 @@ class TurkpinApiClient
 
         $response = curl_exec($ch);
         $curlError = curl_error($ch);
-        curl_close($ch);
 
         // API'ye hiç ulaşılamadıysa (timeout, DNS hatası, bağlantı reddi vb.)
         if ($response === false) {
+            Logger::error('Turkpin API network error', ['cmd' => $cmd, 'curl_error' => $curlError]);
+
             return [
                 'success' => false,
                 'error_code' => 'NETWORK_ERROR',
@@ -86,7 +89,17 @@ class TurkpinApiClient
             ];
         }
 
-        return $this->parseResponse($response);
+        $result = $this->parseResponse($response);
+
+        if (!$result['success']) {
+            Logger::error('Turkpin API error', [
+                'cmd' => $cmd,
+                'error_code' => $result['error_code'],
+                'error_message' => $result['error_message'],
+            ]);
+        }
+
+        return $result;
     }
 
     /**
@@ -119,8 +132,10 @@ class TurkpinApiClient
     /**
      * API'den dönen ham XML cevabını okunabilir bir array'e çevirir.
      * Hem <error>/<error_desc> hem <HATA_NO>/<HATA_ACIKLAMA> formatlarını destekler.
+     *
+     * Public: gerçek bir HTTP isteği atmadan bu parse mantığını unit test edebilmek için.
      */
-    private function parseResponse(string $rawXml): array
+    public function parseResponse(string $rawXml): array
     {
         libxml_use_internal_errors(true);
         $xml = simplexml_load_string($rawXml);
