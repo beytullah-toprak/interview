@@ -23,8 +23,9 @@ src/
     AssetHelper.php           # CSS/JS cache-busting (versiyonlama)
     Logger.php                # storage/logs/api.log'a dosya tabanlı API hata logu
   classes/
-    Main.php                  # Uygulama başlatma + route tanımları
+    Main.php                  # Uygulama başlatma + route tanımları (ince katman)
     Home.php                  # Ana sayfa controller'ı (mevcut yapı korundu)
+    OrderController.php       # /order-token + /order uçları, sipariş akışı
   languages/                  # tr.php / en.php (key setleri birebir eşleşiyor)
   templates/                  # index.html / home.html
 assets/
@@ -39,8 +40,14 @@ tests/
 ```
 
 Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağını bilir
-(curl, XML), Service'ler "ne" isteneceğini bilir (iş kuralları), route'lar
-(Main.php) sadece isteği alıp servise devreder ve cevabı döner.
+(curl, XML), Service'ler "ne" isteneceğini bilir (iş kuralları), Controller'lar
+(`Home`, `OrderController`) isteği alıp servise devreder ve cevabı döner,
+`Main.php` ise yalnızca "hangi URL hangi controller'a gider" sorusunu cevaplar.
+
+Başlangıçta sipariş mantığı `Main.php`'nin içinde inline closure olarak
+duruyordu; her yeni kural (token, doğrulama, ürün yeniden çekme) bu dosyayı
+şişiriyordu. `OrderController` çıkarılınca `Main.php` 149 satırdan 80 satıra
+indi ve routing ile iş mantığı ayrıştı.
 
 ---
 
@@ -65,7 +72,11 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
 - **Çift gönderim engelleme:** her sipariş öncesi `app.js` önce `/order-token`
   endpoint'inden tek kullanımlık bir token alır, ardından bu token ile
   `/order`'a POST atar. Sunucu tarafı aynı token'ın ikinci kez kullanılmasını
-  reddeder (409). Buton, istek sürerken disable ediliyor.
+  reddeder (409). Buton, istek sürerken disable ediliyor. Token'lar 30 dakika
+  TTL ile tutulur; süresi geçenler temizlenir ve session başına en fazla 20
+  aktif token saklanır (kullanılmadan terk edilen token'lar birikmesin diye).
+- **Canlı tutar:** adet değiştikçe satırın "Tutar" hücresi `adet × birim fiyat`
+  ile anında güncellenir; kullanıcı "Satın Al"a basmadan ne ödeyeceğini görür.
 - **Client-side doğrulama:** adet alanı boş/0 girilirse ya da ürünün gerçek
   min/max sınırlarının dışına çıkılırsa (input'un `min`/`max` attribute'ları
   okunarak) gönderim öncesi localize edilmiş bir uyarı gösteriliyor.
@@ -138,6 +149,19 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
    içerik ne olursa olsun her zaman `true` döner (tip farkı), yani "boş ise
    sınırsız" dalı hiçbir zaman çalışmıyordu. `ProductServiceTest` yazılırken
    ortaya çıktı; `(string)` cast'i eklenerek düzeltildi.
+14. **Mobilde "Satın Al" butonu ekran dışında kalıyordu** — sütun sayısı
+   artınca tablo 375px ekranda yatay kaydırmaya düşüyor ve sayfanın var oluş
+   sebebi olan buton görünmez oluyordu. README hem "mevcut tablo yapısını
+   koruyun" hem "responsive tasarımı bozmayın" dediği için tabloyu kart
+   listesine *çevirmek* yerine, HTML tablo yapısı aynı bırakılıp 768px altında
+   satırlar CSS ile karta dönüştürüldü (sütun başlıkları her hücrenin
+   `data-label` değerinden `::before` ile basılıyor). Markup hâlâ tablo,
+   yalnızca sunum değişiyor.
+15. **Sipariş token'ları session'da birikiyordu** — token'lar `[$token => true]`
+   olarak tutuluyor ve kullanılmazsa hiç temizlenmiyordu; sayfa her
+   yenilendiğinde session biraz daha büyüyordu. Artık üretim zamanı saklanıp
+   30 dakikalık TTL uygulanıyor, süresi geçenler temizleniyor ve aktif token
+   sayısı 20 ile sınırlanıyor.
 
 ---
 
@@ -148,9 +172,13 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
 - **Güvenlik:** `.htaccess` güvenlik başlıkları; credential'lar yalnızca
   `.env`'de (kaynak kod ve commit geçmişinde yok); server-side doğrulama;
   `?lang` whitelist'i (LFI koruması) ve Smarty global HTML escape (XSS).
-- **Responsive:** Tablo `md` altında sipariş limiti sütunlarını gizleyip
-  hücre boşluklarını daraltarak "Satın Al" butonunun yatay kaydırma
-  gerektirmeden ekranda kalmasını sağlıyor; 375px genişlikte test edildi.
+- **Marka tasarımı:** Renk paleti (`#EF1414` kırmızı, koyu yüzeyler, nötr
+  griler) turkpin.com skalasından alınıp `:root` altında CSS değişkeni olarak
+  tanımlandı ve Bootstrap'in kendi `--bs-*` değişkenlerine bağlandı; böylece
+  buton/link/focus renkleri element bazında override edilmeden markaya uyuyor.
+- **Responsive:** `md` altında sipariş limiti sütunları gizleniyor, 768px
+  altında ise tablo satırları karta dönüşüyor (yukarıda madde 14). 375px'te
+  yatay taşma yok, buton tam genişlikte ve görünür.
 - **Asset versiyonlama:** `AssetHelper`, dosya değişiklik zamanına göre
   `?v=...` ekleyerek tarayıcı cache sorununu otomatik çözüyor.
 - **APP_DEBUG:** `index.php`, bu değişkene göre `display_errors`/
@@ -196,9 +224,14 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
 ## Bilinen Eksikler / İleride Yapılabilecekler
 
 - Ürün listesi şu an oyun seçiminde sayfa yenilemesiyle geliyor; tam AJAX'a
-  çevrilebilir (sipariş gönderimi zaten AJAX).
-- Sipariş token'ları (`$_SESSION['order_tokens']`) kullanılmadan terk
-  edilirse session'da birikir; kısa bir TTL/temizlik mekanizması eklenebilir.
+  çevrilebilir (sipariş gönderimi zaten AJAX). Yenileme sırasında select
+  disable edilerek kullanıcıya geri bildirim veriliyor.
+- `OrderController`'ın token/TTL mantığı `$_SESSION`'a doğrudan bağlı olduğu
+  için unit test edilmiyor; session erişimi küçük bir arayüzün arkasına
+  alınırsa test edilebilir hale gelir. Şu an curl ile manuel doğrulandı
+  (geçerli sipariş 200, aynı token tekrar 409, token'sız istek 409).
+- Statik analiz (PHPStan) veya kod formatlama (php-cs-fixer) aracı
+  eklenmedi; README'nin artı-değer listesinde yer alıyor.
 
 ---
 
