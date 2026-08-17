@@ -19,17 +19,18 @@ class Home
 
     public function index()
     {
-        global $smarty;
+        global $smarty, $lang;
 
         $selectedGameId = $_GET['game_id'] ?? null;
+        $smarty->assign('game', $selectedGameId ? (int) $selectedGameId : 0);
+        $smarty->assign('template', 'home.html');
 
         $gameResult = $this->gameService->getGames();
 
         if (!$gameResult['success']) {
-            $smarty->assign('error', 'Oyun listesi alınamadı: ' . $gameResult['error_message']);
+            $smarty->assign('error', $lang['games_fetch_error'] . $gameResult['error_message']);
             $smarty->assign('games', []);
             $smarty->assign('products', []);
-            $smarty->assign('template', 'home.html');
             return;
         }
 
@@ -39,13 +40,11 @@ class Home
             if ($productResult['success']) {
                 $products = $productResult['products'];
             } else {
-                $smarty->assign('error', 'Ürünler alınamadı: ' . $productResult['error_message']);
+                $smarty->assign('error', $lang['products_fetch_error'] . $productResult['error_message']);
             }
         }
 
         $smarty->assign('games', $gameResult['games']);
-        $smarty->assign('game', $selectedGameId ? (int) $selectedGameId : 0);
         $smarty->assign('products', $products);
-        $smarty->assign('template', 'home.html');
     }
 }

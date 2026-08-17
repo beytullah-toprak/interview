@@ -39,6 +39,9 @@
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
             <form method="get" action="">
+                {if $game > 0}
+                    <input type="hidden" name="game_id" value="{$game}">
+                {/if}
                 <select name="lang" id="lang" onchange="this.form.submit()">
                     {foreach $langs as $key => $value}
                         <option value="{$key}" {if $key == $LANG.lang}selected{/if}>{$value}</option>
@@ -54,7 +57,10 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
+    <script>
+        window.LANG = {$LANG_JSON};
+    </script>
     <script src="{asset path='assets/js/app.js'}"></script>
 </body>
 

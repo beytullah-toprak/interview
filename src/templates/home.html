@@ -29,7 +29,7 @@
                         <td>{$product.name}</td>
                         <td>
                             {if $product.stock <= 0}
-                                <span class="badge bg-danger">Stokta Yok</span>
+                                <span class="badge bg-danger">{$LANG.out_of_stock}</span>
                             {else}
                                 {$product.stock}
                             {/if}
@@ -38,12 +38,13 @@
                         <td>
                             <input name="quantity" type="number" class="form-control"
                                 value="{$product.min_order}" min="{$product.min_order}"
-                                max="{$product.max_order}" id="quantity_{$product.id}"
+                                {if $product.max_order > 0}max="{$product.max_order}"{/if}
+                                id="quantity_{$product.id}"
                                 {if $product.stock <= 0}disabled{/if}>
                         </td>
                         <td>
                             <button type="button" class="btn btn-primary btn-sm"
-                                onclick="addProducts('{$product.id}', '{$game}')"
+                                onclick="addProducts('{$product.id}', '{$game}', this)"
                                 {if $product.stock <= 0}disabled{/if}>
                                 {$LANG.buy}
                             </button>
@@ -54,7 +55,7 @@
         </table>
     </div>
 {elseif $game > 0}
-    <div class="alert alert-warning">Bu oyuna ait ürün bulunamadı.</div>
+    <div class="alert alert-warning">{$LANG.no_products_found}</div>
 {else}
-    <div class="alert alert-info">Ürünleri görmek için lütfen bir oyun seçin.</div>
+    <div class="alert alert-info">{$LANG.select_game_prompt}</div>
 {/if}

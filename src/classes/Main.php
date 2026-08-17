@@ -27,6 +27,8 @@ class Main
         $smarty->setCompileDir('/tmp');
 
         $smarty->assign('LANG', $lang);
+        // JS tarafında SweetAlert2 mesajlarını localize etmek için (window.LANG olarak kullanılır)
+        $smarty->assign('LANG_JSON', json_encode($lang, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $smarty->assign('langs', ['tr' => 'Türkçe', 'en' => 'English']);
 
         // Template'lerde {$base_url} olarak kullanılır (asset path'leri için)
@@ -40,7 +42,7 @@ class Main
 
     public function run()
     {
-        global $smarty;
+        global $smarty, $lang;
 
         // Ana sayfa - oyun/ürün listesini gösterir
         $this->router->get('/', function () {
@@ -63,7 +65,7 @@ class Main
         // Sipariş oluşturma - AJAX ile çağrılır, JSON döner.
         // Sırasıyla: token kontrolü -> ürünü tekrar API'den çekip
         // min/max/stok doğrulaması -> gerçek siparişi API'ye gönderme.
-        $this->router->post('/order', function () {
+        $this->router->post('/order', function () use ($lang) {
             header('Content-Type: application/json');
 
             $gameId = $_POST['game_id'] ?? '';
@@ -74,14 +76,14 @@ class Main
             // Temel alan kontrolü
             if (!$gameId || !$productId || $quantity < 1) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'Eksik veya hatalı bilgi.']);
+                echo json_encode(['success' => false, 'message' => $lang['missing_fields']]);
                 exit;
             }
 
             // Çift gönderim engelleme: token geçersizse veya daha önce kullanıldıysa reddet
             if (!$token || !isset($_SESSION['order_tokens'][$token])) {
                 http_response_code(409);
-                echo json_encode(['success' => false, 'message' => 'Bu sipariş zaten gönderildi veya oturum süresi doldu.']);
+                echo json_encode(['success' => false, 'message' => $lang['duplicate_order']]);
                 exit;
             }
             unset($_SESSION['order_tokens'][$token]);
@@ -104,11 +106,11 @@ class Main
 
             if (!$product) {
                 http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Ürün bulunamadı.']);
+                echo json_encode(['success' => false, 'message' => $lang['product_not_found']]);
                 exit;
             }
 
-            $validator = new \Turkpin\InterviewTest\Validators\OrderValidator();
+            $validator = new \Turkpin\InterviewTest\Validators\OrderValidator($lang);
             $validationError = $validator->validate($product, $quantity);
 
             if ($validationError) {
