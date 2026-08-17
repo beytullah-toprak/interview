@@ -115,7 +115,25 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
    gerçek bir üst sınır varsa `max` attribute'u basılıyor.
 8. **`curl_close()` çağrısı** — PHP 8.0'dan beri etkisiz, 8.5'te deprecated;
    kaldırıldı.
-9. **`ProductService::getProducts()` içinde ölü kod** — `$urun->max_order !== ''`
+9. **`?lang` doğrulanmıyordu (LFI + kalıcı çökme)** — `$_GET['lang']` hiçbir
+   kontrolden geçmeden `require_once ".../languages/{$lang}.php"` içine
+   giriyordu. Bu hem bir *local file inclusion / path traversal* açığıydı,
+   hem de geçersiz değer **require'dan önce session'a yazıldığı** için tek bir
+   `?lang=zz` isteği session'ı zehirliyor ve sonraki tüm istekler (`/` dahil)
+   fatal error veriyordu; kullanıcı cookie'sini silene kadar siteye
+   giremiyordu. Hem GET hem session değeri artık whitelist'ten geçiyor.
+10. **Template'lerde XSS riski** — oyun/ürün adları harici API'den geliyor ama
+   escape edilmeden basılıyordu (Smarty 5 varsayılan olarak otomatik escape
+   yapmaz). `setEscapeHtml(true)` ile tek yerden kapatıldı; bilinçli olarak
+   ham bırakılan tek değer (`LANG_JSON`) `nofilter` ile işaretlendi.
+11. **Varsayılan oyun seçeneği yanıltıcıydı** — "Tüm Oyunlar" yazıyordu ama
+   seçilince hiçbir ürün listelenmiyordu. README'nin istediği "Oyun Seçiniz"
+   ifadesiyle değiştirildi.
+12. **Parse edilip hiç gösterilmeyen veriler** — `ProductService`
+   `min_order`/`max_order`/`pre_order` alanlarını okuyordu ve dil dosyalarında
+   `min_order`/`max_order` çevirileri hazırdı, ama hiçbiri ekranda
+   gösterilmiyordu. Tabloya sütun ve "Ön Sipariş" rozeti olarak eklendi.
+13. **`ProductService::getProducts()` içinde ölü kod** — `$urun->max_order !== ''`
    bir `SimpleXMLElement`'i string ile karşılaştırıyordu; bu karşılaştırma
    içerik ne olursa olsun her zaman `true` döner (tip farkı), yani "boş ise
    sınırsız" dalı hiçbir zaman çalışmıyordu. `ProductServiceTest` yazılırken
@@ -128,7 +146,11 @@ Katman ayrımının mantığı: `TurkpinApiClient` API'ye "nasıl" konuşulacağ
 - **Docker:** Dockerfile (PHP 8.2 + Apache, mod_rewrite/headers) ve
   docker-compose ile tek komutla çalışan ortam.
 - **Güvenlik:** `.htaccess` güvenlik başlıkları; credential'lar yalnızca
-  `.env`'de (kaynak kod ve commit geçmişinde yok); server-side doğrulama.
+  `.env`'de (kaynak kod ve commit geçmişinde yok); server-side doğrulama;
+  `?lang` whitelist'i (LFI koruması) ve Smarty global HTML escape (XSS).
+- **Responsive:** Tablo `md` altında sipariş limiti sütunlarını gizleyip
+  hücre boşluklarını daraltarak "Satın Al" butonunun yatay kaydırma
+  gerektirmeden ekranda kalmasını sağlıyor; 375px genişlikte test edildi.
 - **Asset versiyonlama:** `AssetHelper`, dosya değişiklik zamanına göre
   `?v=...` ekleyerek tarayıcı cache sorununu otomatik çözüyor.
 - **APP_DEBUG:** `index.php`, bu değişkene göre `display_errors`/
