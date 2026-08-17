@@ -5,6 +5,36 @@ function fireAlert(options) {
     return Swal.fire(Object.assign({ confirmButtonText: L.ok || 'OK' }, options));
 }
 
+/**
+ * Tutarları biçimlendirir. Test API'sinde 0.001 gibi çok küçük birim fiyatlar
+ * da dönüyor; sabit 2 basamak bunları "0.00" gösterip yanıltıcı olurdu, bu
+ * yüzden 2-4 basamak aralığı kullanılıyor.
+ */
+function formatAmount(value) {
+    const L = window.LANG || {};
+    const formatted = new Intl.NumberFormat(L.lang === 'en' ? 'en-US' : 'tr-TR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4
+    }).format(value);
+
+    return formatted + ' ' + (L.currency || '');
+}
+
+/** Bir satırın "adet x birim fiyat" tutarını hesaplayıp hücresine yazar. */
+function updateLineTotal(quantityInput) {
+    const target = document.getElementById(quantityInput.dataset.totalTarget);
+    if (!target) {
+        return;
+    }
+
+    const price = parseFloat(quantityInput.dataset.price);
+    const quantity = parseInt(quantityInput.value, 10);
+
+    target.textContent = (isNaN(price) || isNaN(quantity) || quantity < 1)
+        ? '-'
+        : formatAmount(price * quantity);
+}
+
 function addProducts(productId, gameId, button) {
     const L = window.LANG || {};
     const quantityInput = document.getElementById('quantity_' + productId);
@@ -49,7 +79,8 @@ function addProducts(productId, gameId, button) {
                 fireAlert({
                     icon: 'success',
                     title: L.order_success,
-                    html: (L.order_no || '') + ': <b>' + result.order.order_no + '</b><br>' + (L.total || '') + ': ' + result.order.total
+                    html: (L.order_no || '') + ': <b>' + result.order.order_no + '</b><br>'
+                        + (L.total || '') + ': <b>' + formatAmount(result.order.total) + '</b>'
                 });
             } else {
                 fireAlert({
@@ -86,4 +117,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 0);
         });
     }
+
+    // Satır tutarları: sayfa açılışında bir kez hesapla, sonra adet
+    // değiştikçe canlı güncelle.
+    document.querySelectorAll('input[data-total-target]').forEach(function (input) {
+        updateLineTotal(input);
+        input.addEventListener('input', function () {
+            updateLineTotal(input);
+        });
+    });
 });

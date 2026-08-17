@@ -11,7 +11,10 @@ $lang = [
     'min_order' => 'Min. Order',
     'max_order' => 'Max. Order',
     'quantity' => 'Quantity',
-    'price' => 'Price',
+    'price' => 'Unit Price',
+    'line_total' => 'Total',
+    // API tutarları TL cinsinden dönüyor; sembol iki dilde de aynı.
+    'currency' => '₺',
     'buy' => 'Buy',
     'warning' => 'Warning',
     'error' => 'Error',
