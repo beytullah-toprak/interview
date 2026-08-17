@@ -15,6 +15,7 @@ $lang = [
     'buy' => 'Satın Al',
     'warning' => 'Uyarı',
     'error' => 'Hata',
+    'ok' => 'Tamam',
 
     // Oyun / ürün listesi
     'out_of_stock' => 'Stokta Yok',

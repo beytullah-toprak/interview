@@ -15,6 +15,7 @@ $lang = [
     'buy' => 'Buy',
     'warning' => 'Warning',
     'error' => 'Error',
+    'ok' => 'OK',
 
     // Game / product list
     'out_of_stock' => 'Out of Stock',

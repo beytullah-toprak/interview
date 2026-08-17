@@ -23,9 +23,7 @@
     </header>
 
     {if $error}
-        <div class="alert alert-danger" role="alert">
-            {$error}
-        </div>
+        <div id="page-error" class="d-none" data-message="{$error|escape:'html'}"></div>
     {/if}
 
     <main class="flex-shrink-0">
