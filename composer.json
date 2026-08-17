@@ -5,6 +5,11 @@
 			"Turkpin\\InterviewTest\\": "src/"
 		}
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
+		}
+	},
 	"authors": [
 		{
 			"name": "Turkpin DEV Team",
@@ -15,5 +20,8 @@
 		"smarty/smarty": "^5.0",
 		"bramus/router": "^1.6",
 		"vlucas/phpdotenv": "^5.6"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^11.0"
 	}
 }

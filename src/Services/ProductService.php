@@ -51,7 +51,8 @@ class ProductService
                 'stock' => (int) $urun->stock,
                 'min_order' => (int) $urun->min_order,
                 // max_order boş string gelebiliyor (API dokümanında görüldü): 0/limitsiz anlamına gelir
-                'max_order' => $urun->max_order !== '' ? (int) $urun->max_order : null,
+                // (SimpleXMLElement hiçbir zaman === '' olmadığı için önce string'e çevrilmeli)
+                'max_order' => (string) $urun->max_order !== '' ? (int) $urun->max_order : null,
                 'price' => (float) $urun->price,
                 'tax_type' => (string) $urun->tax_type,
                 'pre_order' => (string) $urun->pre_order === 'true',
