@@ -157,12 +157,16 @@ function addProducts(productId, gameId, button) {
                     ? '<br><small class="text-muted">' + (L.order_pending || '') + '</small>'
                     : '';
 
+                // Sipariş stoğu düşürüyor; "Tamam"a basınca sayfa yenilenip
+                // güncel stok/ürün listesi tekrar API'den çekilsin.
                 fireAlert({
                     icon: 'success',
                     title: L.order_success,
                     html: (L.order_no || '') + ': <b>' + result.order.order_no + '</b><br>'
                         + (L.total || '') + ': <b>' + formatAmount(result.order.total) + '</b>'
                         + pendingNote
+                }).then(() => {
+                    window.location.reload();
                 });
             } else {
                 fireAlert({
