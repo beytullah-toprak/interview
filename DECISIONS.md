@@ -28,39 +28,49 @@ Sipariş sistemi baştan çalışmıyordu — `app.js` `/order-token`'ı hiç
 isteği 409 ile reddediyordu. Onu düzeltmeden hiçbir sipariş geçmiyordu.
 
 Bunun dışında bulduklarım:
+
 - `?lang` parametresi hiç doğrulanmadan dosya yoluna gidiyordu — hem path
-  traversal riski hem de geçersiz bir değer session'a yazılınca kullanıcı
-  cookie silene kadar siteye giremiyordu. Whitelist ekledim.
+traversal riski hem de geçersiz bir değer session'a yazılınca kullanıcı
+cookie silene kadar siteye giremiyordu. Whitelist ekledim.
 - Oyun/ürün adları API'den geliyor ama escape edilmeden basılıyordu (XSS
-  riski). Smarty'de global escape açtım.
-- `en.php`'de sipariş sonucu mesajları için key'ler vardı ama `tr.php`'ye
-  hiç eklenmemişti, JS de zaten bu key'leri kullanmıyordu — tüm mesajlar
-  sabit Türkçeydi. İkisini eşitleyip JS'e bağladım.
+riski). Smarty'de global escape açtım.
+- Dil dosyalarında (`tr.php`/`en.php`) key'ler birebir eşleşmiyordu —
+mesela `en.php`'de sipariş sonucu için (`order_success`, `order_no` gibi)
+key'ler vardı ama `tr.php`'de yoktu. Böyle bir key kullanılan yerde çağrılınca
+PHP "Undefined array key" hatası/uyarısı basıyordu, yani dil değiştirince
+bazı sayfalar hataya düşüyordu. İki dosyayı satır satır karşılaştırıp
+eksik olan key'leri tamamladım, ayrıca JS tarafı (SweetAlert2 mesajları)
+bu key'leri hiç kullanmıyordu, onları da `window.LANG` üzerinden JS'e
+bağladım ki uyarı/hata mesajları da seçilen dile göre değişsin.
 - `ProductService`'te `max_order !== ''` bir XML nesnesini string'le
-  kıyaslıyordu, bu her zaman true dönüyor — yani "boşsa sınırsız" kuralı
-  hiç çalışmıyormuş. Test yazarken fark ettim.
-- `Main.php`'de `require 'home.php'` ama dosya `Home.php` — macOS'ta sorun
-  yok, case-sensitive Linux'ta patlardı.
+kıyaslıyordu, bu her zaman true dönüyor — yani "boşsa sınırsız" kuralı
+hiç çalışmıyormuş. Test yazarken fark ettim.
+- Ana sayfa rotası yanlış dosya yoluna bakıyordu: `Main.php` içinde
+`require 'home.php'` yazıyordu ama gerçek dosya adı `Home.php`. macOS
+büyük/küçük harf duyarsız çalıştığı için burada bir sorun görünmüyordu,
+ama sunucu genelde Linux (case-sensitive) olacağı için deploy edilince
+"dosya bulunamadı" fatal error verirdi. `__DIR__ . '/Home.php'` ile doğru
+yola sabitledim.
 - Mobilde tablo 8 sütunla yatay taşıyor, "Satın Al" butonu ekran dışında
-  kalıyordu. Tabloyu bozmadan (README öyle istiyor) 768px altında satırları
-  CSS ile karta çevirdim.
-- `aura/router` composer'da duruyordu ama proje zaten Bramus kullanıyor,
-  hiç çağrılmıyordu — kaldırdım.
+kalıyordu. Tabloyu bozmadan (README öyle istiyor) 768px altında satırları
+CSS ile karta çevirdim.
+- `composer.json`'da gereksiz bir kütüphane vardı: `aura/router`. Proje
+zaten routing için `bramus/router`'ı kullanıyor, kodun hiçbir yerinde
+`Aura\Router`'a tek bir referans bile yoktu — muhtemelen ilk kurulumda
+denenip sonra kullanılmayan bir bağımlılık olarak kalmış. `composer.json`'dan
+kaldırıp `composer update` ile `vendor/`'dan da temizledim; gereksiz paket
+kurulum süresini uzatıyordu.
 - Sipariş token'ları session'da hiç temizlenmeden birikiyordu, TTL ekledim.
 - Route eşleşmeyince sayfa boş dönüyordu, gerçek 404 sayfası ekledim.
 
+
+
 ## Ek olarak
 
-Docker ile tek komutta ayağa kalkıyor, `.env` dışında credential hiçbir
-yerde yok. `AssetHelper` dosya değişim zamanına göre `?v=...` ekliyor ki
-CSS/JS güncelleyince kullanıcı elle hard-refresh yapmasın. API hataları
-`storage/logs/api.log`'a yazılıyor. `OrderValidator`, XML parse mantığı,
-servisler ve para formatlama için 21 PHPUnit testi var
+Docker ile tek komutta ayağa kalkıyor, `.env` dışında credential hiçbir  
+yerde yok. `AssetHelper` dosya değişim zamanına göre `?v=...` ekliyor ki  
+CSS/JS güncelleyince kullanıcı elle hard-refresh yapmasın. API hataları  
+`storage/logs/api.log`'a yazılıyor. `OrderValidator`, XML parse mantığı,  
+servisler ve para formatlama için 21 PHPUnit testi var  
 (`vendor/bin/phpunit`).
 
-## Eksik kalanlar
-
-Ürün listesi hâlâ sayfa yenilemesiyle geliyor, tam AJAX'a çevrilebilir.
-Token/TTL mantığı session'a bağlı olduğu için unit test edilmiyor, curl ile
-elle doğruladım. PHPStan/php-cs-fixer gibi bir statik analiz aracı
-eklemedim.
