@@ -9,6 +9,8 @@ min/max/stok kontrolünü yapıyor. `Home.php` ve `Order.php` da bunları
 mantığının tamamı inline duruyordu, onu `Order.php`'ye çıkardım — dosya 149
 satırdan 80'e indi ve artık sadece route tanımlıyor.
 
+
+
 ## Ne yaptım
 
 Oyun listesi ve ürünler gerçek API'den geliyor, oyun seçilmeden ürün
@@ -73,4 +75,3 @@ CSS/JS güncelleyince kullanıcı elle hard-refresh yapmasın. API hataları
 `storage/logs/api.log`'a yazılıyor. `OrderValidator`, XML parse mantığı,  
 servisler ve para formatlama için 21 PHPUnit testi var  
 (`vendor/bin/phpunit`).
-
