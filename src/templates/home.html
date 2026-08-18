@@ -32,6 +32,12 @@
                     {foreach $products as $product}
                         {* data-label: mobilde tablo satırları karta dönüşürken
                            her hücrenin başlığı CSS ::before ile buradan basılır *}
+                        {* Baremli ürün: adet yerine min_barem-max_barem aralığında bir
+                           tutar girilir (API dokümantasyonu + canlı testle doğrulandı). *}
+                        {assign var="isTiered" value=$product.min_barem !== null}
+                        {* Ön sipariş ürünleri stoktan bağımsız işleme alınıyor: stok=0
+                           olsa bile "Pending" durumuyla sipariş kabul ediliyor. *}
+                        {assign var="isBlocked" value=$product.stock <= 0 && !$product.pre_order}
                         <tr>
                             <td class="tp-product-name">
                                 {$product.name}
@@ -40,7 +46,7 @@
                                 {/if}
                             </td>
                             <td class="text-center" data-label="{$LANG.stock}">
-                                {if $product.stock <= 0}
+                                {if $isBlocked}
                                     <span class="tp-badge tp-badge-muted">{$LANG.out_of_stock}</span>
                                 {else}
                                     {$product.stock}
@@ -51,25 +57,33 @@
                                 {if $product.max_order > 0}{$product.max_order}{else}<span class="text-muted">{$LANG.unlimited}</span>{/if}
                             </td>
                             <td class="tp-price text-nowrap text-end" data-label="{$LANG.price}">{$product.price|money}</td>
-                            <td class="text-center" data-label="{$LANG.quantity}">
-                                {* Stokta yoksa adet 0 gösterilir; alan zaten disabled olduğu
-                                   için sipariş edilemez ve satır tutarı da 0 çıkar. *}
-                                {* data-price: adet değişince satır tutarını JS tarafında hesaplamak için *}
-                                <input name="quantity" type="number" class="form-control"
-                                    value="{if $product.stock <= 0}0{else}{$product.min_order}{/if}"
-                                    min="{$product.min_order}"
-                                    {if $product.max_order > 0}max="{$product.max_order}"{/if}
-                                    id="quantity_{$product.id}"
-                                    data-price="{$product.price}"
-                                    data-total-target="total_{$product.id}"
-                                    {if $product.stock <= 0}disabled{/if}>
+                            <td class="text-center" data-label="{if $isTiered}{$LANG.barem_amount}{else}{$LANG.quantity}{/if}">
+                                {* data-price: değer değişince satır tutarını JS tarafında hesaplamak için *}
+                                {if $isTiered}
+                                    <input name="barem" type="number" class="form-control" step="any"
+                                        value="{$product.min_barem}" min="{$product.min_barem}" max="{$product.max_barem}"
+                                        id="barem_{$product.id}"
+                                        data-barem-step="{$product.barem_step}"
+                                        data-price="{$product.price}"
+                                        data-total-target="total_{$product.id}"
+                                        {if $isBlocked}disabled{/if}>
+                                {else}
+                                    <input name="quantity" type="number" class="form-control"
+                                        value="{if $isBlocked}0{else}{$product.min_order}{/if}"
+                                        min="{$product.min_order}"
+                                        {if $product.max_order > 0}max="{$product.max_order}"{/if}
+                                        id="quantity_{$product.id}"
+                                        data-price="{$product.price}"
+                                        data-total-target="total_{$product.id}"
+                                        {if $isBlocked}disabled{/if}>
+                                {/if}
                             </td>
                             <td class="tp-line-total text-nowrap text-end" id="total_{$product.id}"
                                 data-label="{$LANG.line_total}"></td>
                             <td class="tp-buy-cell">
                                 <button type="button" class="btn btn-primary btn-sm text-nowrap w-100"
                                     onclick="addProducts('{$product.id}', '{$game}', this)"
-                                    {if $product.stock <= 0}disabled{/if}>
+                                    {if $isBlocked}disabled{/if}>
                                     {$LANG.buy}
                                 </button>
                             </td>

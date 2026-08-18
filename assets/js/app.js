@@ -37,27 +37,81 @@ function updateLineTotal(quantityInput) {
         : formatAmount(price * quantity);
 }
 
-/* Sipariş oluşturma işlemi */
-function addProducts(productId, gameId, button) {
-    const L = window.LANG || {};
-    const quantityInput = document.getElementById('quantity_' + productId);
+/**
+ * Baremli (kademeli) ürünlerde adet yerine girilen tutarı doğrular.
+ * @returns {number|null} Geçerliyse tutar, geçersizse null (uyarı zaten gösterilir)
+ */
+function readAndValidateBarem(baremInput, L) {
+    const value = parseFloat(baremInput.value);
+    const min = parseFloat(baremInput.min);
+    const max = parseFloat(baremInput.max);
+    const step = parseFloat(baremInput.dataset.baremStep);
+
+    if (isNaN(value)) {
+        fireAlert({ icon: 'warning', title: L.warning, text: L.barem_required_error });
+        return null;
+    }
+
+    if (value < min || value > max) {
+        fireAlert({ icon: 'warning', title: L.warning, text: (L.barem_range_error || '').replace(':min', min).replace(':max', max) });
+        return null;
+    }
+
+    const steps = (value - min) / step;
+    if (Math.abs(steps - Math.round(steps)) > 0.0001) {
+        fireAlert({ icon: 'warning', title: L.warning, text: (L.barem_step_error || '').replace(':step', step) });
+        return null;
+    }
+
+    return value;
+}
+
+/**
+ * Normal ürünlerde adet alanını doğrular.
+ * @returns {number|null} Geçerliyse adet, geçersizse null (uyarı zaten gösterilir)
+ */
+function readAndValidateQuantity(quantityInput, L) {
     const quantity = quantityInput ? parseInt(quantityInput.value, 10) : 0;
     const min = quantityInput && quantityInput.min !== '' ? parseInt(quantityInput.min, 10) : NaN;
     const max = quantityInput && quantityInput.max !== '' ? parseInt(quantityInput.max, 10) : NaN;
 
     if (!quantity || quantity < 1) {
         fireAlert({ icon: 'warning', title: L.warning, text: L.invalid_quantity });
-        return;
+        return null;
     }
 
     if (!isNaN(min) && quantity < min) {
         fireAlert({ icon: 'warning', title: L.warning, text: (L.quantity_too_low || '').replace(':min', min) });
-        return;
+        return null;
     }
 
     if (!isNaN(max) && max > 0 && quantity > max) {
         fireAlert({ icon: 'warning', title: L.warning, text: (L.quantity_too_high || '').replace(':max', max) });
-        return;
+        return null;
+    }
+
+    return quantity;
+}
+
+/* Sipariş oluşturma işlemi */
+function addProducts(productId, gameId, button) {
+    const L = window.LANG || {};
+    const quantityInput = document.getElementById('quantity_' + productId);
+    const baremInput = document.getElementById('barem_' + productId);
+
+    let quantity = 1;
+    let barem = null;
+
+    if (baremInput) {
+        barem = readAndValidateBarem(baremInput, L);
+        if (barem === null) {
+            return;
+        }
+    } else {
+        quantity = readAndValidateQuantity(quantityInput, L);
+        if (quantity === null) {
+            return;
+        }
     }
 
     if (button) {
@@ -72,6 +126,9 @@ function addProducts(productId, gameId, button) {
             formData.append('game_id', gameId);
             formData.append('product_id', productId);
             formData.append('quantity', quantity);
+            if (barem !== null) {
+                formData.append('barem', barem);
+            }
             formData.append('order_token', tokenResult.token);
 
             return fetch('/order', { method: 'POST', body: formData });
@@ -79,11 +136,18 @@ function addProducts(productId, gameId, button) {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
+                // Ön sipariş/barem ürünlerde sipariş hemen değil "Pending"
+                // durumuyla oluşur; kullanıcıya bunu ayrıca belirtiyoruz.
+                const pendingNote = result.order.pending
+                    ? '<br><small class="text-muted">' + (L.order_pending || '') + '</small>'
+                    : '';
+
                 fireAlert({
                     icon: 'success',
                     title: L.order_success,
                     html: (L.order_no || '') + ': <b>' + result.order.order_no + '</b><br>'
                         + (L.total || '') + ': <b>' + formatAmount(result.order.total) + '</b>'
+                        + pendingNote
                 });
             } else {
                 fireAlert({
