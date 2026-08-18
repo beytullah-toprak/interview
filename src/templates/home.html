@@ -41,13 +41,15 @@
                         <tr>
                             <td class="tp-product-name">
                                 {$product.name}
-                                {if $product.pre_order}
-                                    <span class="tp-badge tp-badge-preorder ms-1">{$LANG.pre_order}</span>
-                                {/if}
                             </td>
                             <td class="text-center" data-label="{$LANG.stock}">
                                 {if $isBlocked}
                                     <span class="tp-badge tp-badge-muted">{$LANG.out_of_stock}</span>
+                                {elseif $product.pre_order && $product.stock <= 0}
+                                    {* Ön sipariş ürünlerinde stok=0 satılamaz anlamına gelmiyor
+                                       (Turkpin sonradan teslim ediyor); "0" yazmak kullanıcıyı
+                                       "stokta yok" sanıp vazgeçirir, o yüzden rakam yerine rozet. *}
+                                    <span class="tp-badge tp-badge-preorder">{$LANG.pre_order}</span>
                                 {else}
                                     {$product.stock}
                                 {/if}
