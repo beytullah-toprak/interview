@@ -82,6 +82,11 @@ güvenilmiyor)
 - pre-order ürünlerde stok=0 olsa da buton aktif kalıyor
 - sipariş "Pending" dönerse kullanıcıya ayrıca not gösteriliyor
 
+Not: Test ortamındaki "Product Barem 25 TL" / "Product Barem 30 TL"
+(id=21, 22) ürünlerinin `epinSiparisYarat`'ta "Ürün bulunamadı" döndürdüğünü
+fark ettim — doğrudan API'ye karşı test ederek kodumuzdan kaynaklanmadığını,
+sandbox veri tutarsızlığı olduğunu doğruladım.
+
 
 
 ## Sorunlardan yola çıkıp eklediğim özellikler
