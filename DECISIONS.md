@@ -84,8 +84,7 @@ oluşturuyordu ama hiçbir şey oraya yazmıyordu — yani API'den bir hata
 dönse bile hiçbir iz kalmıyordu. `TurkpinApiClient` içindeki ağ hatalarını
 ve API'nin döndürdüğü hata kodlarını `storage/logs/api.log`'a yazacak
 şekilde bağladım.
-- `APP_DEBUG`**:** `.env.example`'da bu değişken tanımlıydı ama kodun hiçbir
-yerinde okunmuyordu, yani hiçbir işlevi yoktu. `index.php`'de bu değere
+- `APP_DEBUG`**:** `.env.example`'da bu değişken tanımladım. `index.php`'de bu değere
 göre `display_errors`/`error_reporting`'i açıp kapatacak şekilde bağladım
 — geliştirirken hatayı görüyorum, canlıda kullanıcıya stack trace
 sızmıyor.
