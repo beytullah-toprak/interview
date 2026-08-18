@@ -59,6 +59,33 @@ kurulum süresini uzatıyordu.
 - Sipariş token'ları session'da hiç temizlenmeden birikiyordu, TTL ekledim.
 - Route eşleşmeyince sayfa boş dönüyordu, gerçek 404 sayfası ekledim.
 
+## Barem (kademeli) ve ön sipariş ürünleri
+
+dev.turkpin.com'daki API dokümantasyonunu satır satır okuyunca fark ettim:
+`epinUrunleri` bazı ürünlerde `min_barem`/`max_barem`/`barem_step` alanları
+dönüyor (sabit adet yerine bir aralıkta tutar giriliyor), `epinSiparisYarat`
+da bunun için opsiyonel `barem` ve `pre_order` parametreleri kabul ediyor.
+Ben bunları hiç göndermiyordum — test verisindeki barem/ön sipariş
+ürünlerinin stoğu 0 olduğu için (buton zaten disabled) bu eksik kullanıcıya
+görünmüyordu ama gerçek bir ürün gelse sipariş muhtemelen reddedilirdi.
+
+Davranışı tahmin etmek yerine gerçek API'ye karşı denedim:
+- `barem` göndermeden sadece `adet` ile denedim → `026 Barem değeri eksik yada hatalı`
+- Aralık dışı bir `barem` denedim (10, min 25) → `027 Barem değeri 25 ile 1250 arasında olmalıdır`
+- Geçerli bir `barem` (25.01) + `pre_order=true` ile denedim, ürünün stoğu 0 olmasına rağmen → **sipariş gerçekten oluştu**, `HATA_NO=000`, durum `Pending`
+
+Bu son test ayrıca şunu da gösterdi: **stok=0 olması pre-order/barem
+ürünlerini engellemiyor**, Turkpin bunları sonradan teslim ediyor. Bizim
+"stok yoksa buton disabled" kuralımız bu yüzden pre-order ürünlerde
+yanlıştı (test verisinde hepsi stoksuz olduğu için tesadüfen sorun
+çıkarmıyordu). Şimdi:
+- baremli üründe adet alanı yerine min/max/step'e uyan bir tutar giriliyor
+- `pre_order` değeri kullanıcıdan alınmıyor, az önce API'den taze çekilen
+  ürünün kendi alanından okunuyor (min/max/stok'ta olduğu gibi client'a
+  güvenilmiyor)
+- pre-order ürünlerde stok=0 olsa da buton aktif kalıyor
+- sipariş "Pending" dönerse kullanıcıya ayrıca not gösteriliyor
+
 
 
 ## Sorunlardan yola çıkıp eklediğim özellikler
@@ -97,12 +124,13 @@ açık mavi zemine siyah yazı, `text-bg-danger` markanın kırmızısıyla
 rozetlerimi yazdım. Dolu kırmızı "Satın Al" butonu da tabloda altı kez
 tekrar edince "sil/uyarı" gibi okunuyordu, koyu zemine çevirip kırmızıyı
 sadece hover'da vurgu olarak bıraktım.
-- **PHPUnit testleri (21 test):** `OrderValidator`'ın min/max/stok
+- **PHPUnit testleri (31 test):** `OrderValidator`'ın min/max/stok/barem
 kurallarını, `TurkpinApiClient`'ın XML parse mantığını (API'nin iki farklı
-hata formatını da), servislerin API cevabını array'e çevirme mantığını ve
-`MoneyHelper`'ı test ediyor. `ProductService`'teki ölü kodu da bu testi
-yazarken buldum — yani testler sadece "güvence" değil, fiilen bug da
-yakaladı. Çalıştırmak için: `vendor/bin/phpunit`.
+hata formatını da), servislerin API cevabını array'e çevirme mantığını
+(barem/pre_order parametreleri dahil) ve `MoneyHelper`'ı test ediyor.
+`ProductService`'teki ölü kodu da bu testi yazarken buldum — yani testler
+sadece "güvence" değil, fiilen bug da yakaladı. Çalıştırmak için:
+`vendor/bin/phpunit`.
 - **Docker:** `.env`'i doldurup `docker compose up -d --build` demek  
 yeterli olsun diye Dockerfile + docker-compose ekledim; credential  
 kaynak kodda değil sadece `.env`'de duruyor, o dosya da `.gitignore`'da.
