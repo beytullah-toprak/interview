@@ -23,6 +23,8 @@ $lang = [
     'select_game' => 'Oyun Seçiniz',
     'pre_order' => 'Ön Sipariş',
     'unlimited' => 'Sınırsız',
+    'barem_amount' => 'Tutar (₺)',
+    'order_pending' => 'Siparişiniz ön sipariş olarak alındı, teslimat aşamasında.',
     'loading' => 'Yükleniyor...',
     'out_of_stock' => 'Stokta Yok',
     'no_products_found' => 'Bu oyuna ait ürün bulunamadı.',
@@ -53,4 +55,7 @@ $lang = [
     'min_order_error' => 'Sipariş adedi en az :min olmalı.',
     'max_order_error' => 'Sipariş adedi en fazla :max olmalı.',
     'out_of_stock_error' => 'Ürün stokta yok.',
+    'barem_required_error' => 'Lütfen bir tutar girin.',
+    'barem_range_error' => 'Tutar :min ile :max arasında olmalı.',
+    'barem_step_error' => 'Tutar :step adımlarıyla artmalı.',
 ];

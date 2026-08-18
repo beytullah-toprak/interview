@@ -23,6 +23,8 @@ $lang = [
     'select_game' => 'Select Game',
     'pre_order' => 'Pre-Order',
     'unlimited' => 'Unlimited',
+    'barem_amount' => 'Amount (₺)',
+    'order_pending' => 'Your order was placed as a pre-order and is being processed.',
     'loading' => 'Loading...',
     'out_of_stock' => 'Out of Stock',
     'no_products_found' => 'No products found for this game.',
@@ -53,4 +55,7 @@ $lang = [
     'min_order_error' => 'Order quantity must be at least :min.',
     'max_order_error' => 'Order quantity must be at most :max.',
     'out_of_stock_error' => 'Product is out of stock.',
+    'barem_required_error' => 'Please enter an amount.',
+    'barem_range_error' => 'Amount must be between :min and :max.',
+    'barem_step_error' => 'Amount must increase in steps of :step.',
 ];

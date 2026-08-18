@@ -55,8 +55,12 @@ class Order
         $productId = $_POST['product_id'] ?? '';
         $quantity = (int) ($_POST['quantity'] ?? 0);
         $token = $_POST['order_token'] ?? '';
+        // Baremli ürünlerde adet yerine bu gönderilir; boş/yok ise null kalır.
+        $barem = ($_POST['barem'] ?? '') !== '' ? (float) $_POST['barem'] : null;
 
-        if (!$gameId || !$productId || $quantity < 1) {
+        // Baremli üründe adet zaten kullanılmıyor (API'ye sabit 1 gider),
+        // bu yüzden temel kontrolde barem varsa adet şartını atlıyoruz.
+        if (!$gameId || !$productId || ($barem === null && $quantity < 1)) {
             $this->json(['success' => false, 'message' => $this->lang['missing_fields']], 400);
         }
 
@@ -83,14 +87,21 @@ class Order
             $this->json(['success' => false, 'message' => $this->lang['product_not_found']], 404);
         }
 
-        $validationError = (new OrderValidator($this->lang))->validate($product, $quantity);
+        $validationError = (new OrderValidator($this->lang))->validate($product, $quantity, $barem);
 
         if ($validationError) {
             $this->json(['success' => false, 'message' => $validationError], 422);
         }
 
-        // Tüm kontroller geçti, gerçek siparişi API'ye gönder
-        $result = (new OrderService($client))->createOrder($gameId, $productId, $quantity);
+        // pre_order değerini kullanıcıdan almıyoruz: az önce API'den taze
+        // çektiğimiz ürünün kendi alanından okuyoruz (client-side manipülasyona kapalı).
+        $result = (new OrderService($client))->createOrder(
+            $gameId,
+            $productId,
+            $quantity,
+            $product['pre_order'],
+            $barem
+        );
 
         $this->json($result);
     }

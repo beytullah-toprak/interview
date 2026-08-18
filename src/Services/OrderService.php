@@ -17,24 +17,44 @@ class OrderService
     /**
      * Yeni bir Epin siparişi oluşturur.
      *
-     * @param string $gameId    Oyun kodu
-     * @param string $productId Ürün kodu
-     * @param int    $quantity  Sipariş adedi (min_order/max_order kontrolü Controller/Validator'da yapılmalı)
+     * @param string     $gameId    Oyun kodu
+     * @param string     $productId Ürün kodu
+     * @param int        $quantity  Sipariş adedi (baremli üründe yok sayılır, min/max/stok
+     *                              kontrolü Controller/Validator'da yapılmalı)
+     * @param bool       $preOrder  Ön sipariş ürünü ise true gönderilmeli (API dokümantasyonu)
+     * @param float|null $barem     Baremli üründe adet yerine gönderilen tutar
      *
      * @return array{
      *     success: bool,
      *     error_code: string,
      *     error_message: string,
-     *     order: array{order_no: string, total: float, epins: array}|null
+     *     order: array{order_no: string, total: float, pending: bool, epins: array}|null
      * }
      */
-    public function createOrder(string $gameId, string $productId, int $quantity): array
-    {
-        $result = $this->client->request('epinSiparisYarat', [
+    public function createOrder(
+        string $gameId,
+        string $productId,
+        int $quantity,
+        bool $preOrder = false,
+        ?float $barem = null
+    ): array {
+        $params = [
             'oyunKodu' => $gameId,
             'urunKodu' => $productId,
-            'adet' => $quantity,
-        ]);
+            // Baremli üründe API "adet"i yine zorunlu tutuyor ama gerçek tutarı
+            // "barem" alanından okuyor; dokümantasyon ve canlı testle doğrulandı.
+            'adet' => $barem !== null ? 1 : $quantity,
+        ];
+
+        if ($preOrder) {
+            $params['pre_order'] = 'true';
+        }
+
+        if ($barem !== null) {
+            $params['barem'] = $barem;
+        }
+
+        $result = $this->client->request('epinSiparisYarat', $params);
 
         if (!$result['success']) {
             return [
@@ -62,6 +82,9 @@ class OrderService
             'order' => [
                 'order_no' => (string) $data->siparisNo,
                 'total' => (float) $data->siparisTutari,
+                // Ön sipariş/barem ürünlerde epin kodları hemen gelmiyor, sipariş
+                // "Pending" durumunda dönüyor (canlı testle doğrulandı).
+                'pending' => (string) ($data->siparisSonuc ?? '') === 'Pending',
                 'epins' => $epins,
             ],
         ];
