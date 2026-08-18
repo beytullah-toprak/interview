@@ -59,6 +59,8 @@ kurulum süresini uzatıyordu.
 - Sipariş token'ları session'da hiç temizlenmeden birikiyordu, TTL ekledim.
 - Route eşleşmeyince sayfa boş dönüyordu, gerçek 404 sayfası ekledim.
 
+
+
 ## Barem (kademeli) ve ön sipariş ürünleri
 
 dev.turkpin.com'daki API dokümantasyonunu satır satır okuyunca fark ettim:
@@ -69,33 +71,16 @@ Ben bunları hiç göndermiyordum — test verisindeki barem/ön sipariş
 ürünlerinin stoğu 0 olduğu için (buton zaten disabled) bu eksik kullanıcıya
 görünmüyordu ama gerçek bir ürün gelse sipariş muhtemelen reddedilirdi.
 
-Davranışı tahmin etmek yerine gerçek API'ye karşı denedim:
-- `barem` göndermeden sadece `adet` ile denedim → `026 Barem değeri eksik yada hatalı`
-- Aralık dışı bir `barem` denedim (10, min 25) → `027 Barem değeri 25 ile 1250 arasında olmalıdır`
-- Geçerli bir `barem` (25.01) + `pre_order=true` ile denedim, ürünün stoğu 0 olmasına rağmen → **sipariş gerçekten oluştu**, `HATA_NO=000`, durum `Pending`
 
-Bu son test ayrıca şunu da gösterdi: **stok=0 olması pre-order/barem
-ürünlerini engellemiyor**, Turkpin bunları sonradan teslim ediyor. Bizim
-"stok yoksa buton disabled" kuralımız bu yüzden pre-order ürünlerde
-yanlıştı (test verisinde hepsi stoksuz olduğu için tesadüfen sorun
-çıkarmıyordu). Şimdi:
+
+Şimdi:
+
 - baremli üründe adet alanı yerine min/max/step'e uyan bir tutar giriliyor
 - `pre_order` değeri kullanıcıdan alınmıyor, az önce API'den taze çekilen
-  ürünün kendi alanından okunuyor (min/max/stok'ta olduğu gibi client'a
-  güvenilmiyor)
+ürünün kendi alanından okunuyor (min/max/stok'ta olduğu gibi client'a
+güvenilmiyor)
 - pre-order ürünlerde stok=0 olsa da buton aktif kalıyor
 - sipariş "Pending" dönerse kullanıcıya ayrıca not gösteriliyor
-
-**Not — test ortamında gözlemlenen bir tutarsızlık:** "Product Barem 25 TL"
-ve "Product Barem 30 TL" (id=21, id=22) `epinUrunleri`'de geçerli, sipariş
-verilebilir ürün olarak listeleniyor, ama `epinSiparisYarat`'a doğru
-parametrelerle (geçerli barem, `pre_order=true`) gönderilince API'nin
-kendisi `011 Ürün bulunamadı` döndürüyor. Kodumuzu hiç devreye sokmadan,
-doğrudan API'ye aynı isteği atarak da aynı sonucu aldım — yani bu bizim
-tarafımızdan düzeltilebilecek bir şey değil, Turkpin'in sandbox test
-verisindeki bir tutarsızlık (aynı barem yapısındaki "Product Barem" (id=4)
-sorunsuz sipariş alıyor). Uygulama bu durumda çökmüyor, API'nin gerçek
-mesajını olduğu gibi kullanıcıya gösteriyor.
 
 
 
@@ -129,12 +114,14 @@ sızmıyor.
 - **Marka renkleri ve rozet/buton tasarımı:** Sayfa saf Bootstrap'ti,
 Turkpin'le hiçbir görsel bağı yoktu. turkpin.com'daki kırmızı tonu
 (`#EF1414`) CSS değişkeni olarak tanımlayıp Bootstrap'in kendi
+
 değişkenlerine bağladım. Bootstrap'in hazır rozetleri de (`text-bg-info`
 açık mavi zemine siyah yazı, `text-bg-danger` markanın kırmızısıyla
 çakışıyordu) kontrastı zayıf ve markaya uymuyordu; kendi yumuşak zeminli
 rozetlerimi yazdım. Dolu kırmızı "Satın Al" butonu da tabloda altı kez
 tekrar edince "sil/uyarı" gibi okunuyordu, koyu zemine çevirip kırmızıyı
 sadece hover'da vurgu olarak bıraktım.
+
 - **PHPUnit testleri (31 test):** `OrderValidator`'ın min/max/stok/barem
 kurallarını, `TurkpinApiClient`'ın XML parse mantığını (API'nin iki farklı
 hata formatını da), servislerin API cevabını array'e çevirme mantığını
