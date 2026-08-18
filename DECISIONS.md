@@ -86,6 +86,17 @@ yanlıştı (test verisinde hepsi stoksuz olduğu için tesadüfen sorun
 - pre-order ürünlerde stok=0 olsa da buton aktif kalıyor
 - sipariş "Pending" dönerse kullanıcıya ayrıca not gösteriliyor
 
+**Not — test ortamında gözlemlenen bir tutarsızlık:** "Product Barem 25 TL"
+ve "Product Barem 30 TL" (id=21, id=22) `epinUrunleri`'de geçerli, sipariş
+verilebilir ürün olarak listeleniyor, ama `epinSiparisYarat`'a doğru
+parametrelerle (geçerli barem, `pre_order=true`) gönderilince API'nin
+kendisi `011 Ürün bulunamadı` döndürüyor. Kodumuzu hiç devreye sokmadan,
+doğrudan API'ye aynı isteği atarak da aynı sonucu aldım — yani bu bizim
+tarafımızdan düzeltilebilecek bir şey değil, Turkpin'in sandbox test
+verisindeki bir tutarsızlık (aynı barem yapısındaki "Product Barem" (id=4)
+sorunsuz sipariş alıyor). Uygulama bu durumda çökmüyor, API'nin gerçek
+mesajını olduğu gibi kullanıcıya gösteriyor.
+
 
 
 ## Sorunlardan yola çıkıp eklediğim özellikler
