@@ -118,6 +118,21 @@ function addProducts(productId, gameId, button) {
         button.disabled = true;
     }
 
+    // İstek sürerken hiç modal göstermezsek, önceki modal kapanışıyla bu
+    // modalın açılışı arasında SweetAlert2'nin sayfa üzerindeki scrollbar
+    // kilidi (body overflow:hidden) kısa süreliğine kalkıyor ve footer
+    // görünür şekilde yukarı kayıp sonuç gelince geri düzeliyordu. Kilidi
+    // hiç bırakmamak için istek başlar başlamaz bir yükleniyor modalı açıp
+    // sonucu geldiğinde fireAlert ile aynı modalın üzerine yazıyoruz.
+    Swal.fire({
+        title: L.loading || 'Loading...',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
     // Çift gönderim engelleme: her sipariş öncesi tek kullanımlık bir token alınır.
     fetch('/order-token')
         .then(response => response.json())
