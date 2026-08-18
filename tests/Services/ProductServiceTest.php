@@ -40,6 +40,9 @@ class ProductServiceTest extends TestCase
             'stock' => 5,
             'min_order' => 1,
             'max_order' => null, // boş string -> sınırsız
+            'min_barem' => null,
+            'max_barem' => null,
+            'barem_step' => null,
             'price' => 9.90,
             'tax_type' => 'included',
             'pre_order' => false,
@@ -47,6 +50,32 @@ class ProductServiceTest extends TestCase
 
         $this->assertSame(0, $result['products'][1]['max_order']); // "0" -> sınırsız anlamına gelir
         $this->assertTrue($result['products'][1]['pre_order']);
+    }
+
+    public function testGetProductsParsesBaremFields(): void
+    {
+        $data = simplexml_load_string(
+            '<params><epinUrunListesi>'
+            . '<urun><id>4</id><name>Product Barem</name><stock>0</stock>'
+            . '<min_order>1</min_order><max_order></max_order>'
+            . '<min_barem>25</min_barem><max_barem>1250</max_barem><barem_step>0.01</barem_step>'
+            . '<price>0.001</price><tax_type>0</tax_type><pre_order>true</pre_order></urun>'
+            . '</epinUrunListesi></params>'
+        );
+
+        $client = $this->createMock(TurkpinApiClient::class);
+        $client->method('request')->willReturn([
+            'success' => true,
+            'error_code' => '000',
+            'error_message' => '',
+            'data' => $data,
+        ]);
+
+        $result = (new ProductService($client))->getProducts('1');
+
+        $this->assertSame(25.0, $result['products'][0]['min_barem']);
+        $this->assertSame(1250.0, $result['products'][0]['max_barem']);
+        $this->assertSame(0.01, $result['products'][0]['barem_step']);
     }
 
     public function testGetProductsReturnsEmptyListOnFailure(): void
