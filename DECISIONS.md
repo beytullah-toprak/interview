@@ -67,11 +67,49 @@ kurulum süresini uzatıyordu.
 
 
 
-## Ek olarak
+## Sorunlardan yola çıkıp eklediğim özellikler
 
-Docker ile tek komutta ayağa kalkıyor, `.env` dışında credential hiçbir  
-yerde yok. `AssetHelper` dosya değişim zamanına göre `?v=...` ekliyor ki  
-CSS/JS güncelleyince kullanıcı elle hard-refresh yapmasın. API hataları  
-`storage/logs/api.log`'a yazılıyor. `OrderValidator`, XML parse mantığı,  
-servisler ve para formatlama için 21 PHPUnit testi var  
-(`vendor/bin/phpunit`).
+Yukarıdaki bug'ların bir kısmı düzeltilirken, arkasında duran asıl soruna
+bakıp kalıcı bir çözüm olarak küçük yardımcı sınıflar/özellikler ekledim:
+
+- **`AssetHelper` (cache-busting):** CSS/JS dosyasını güncelleyip deploy
+  ettiğimde kullanıcının tarayıcısı hâlâ eski dosyayı cache'ten okuyabilir,
+  değişiklik görünmez. `AssetHelper::url()` dosyanın son değişim zamanını
+  (`filemtime`) alıp linke `?v=...` diye ekliyor; dosya değişince bu sayı da
+  değişiyor, tarayıcı "farklı bir URL" deyip yeniden indiriyor. Elle versiyon
+  numarası takip etmeye gerek kalmadı.
+- **`MoneyHelper` (fiyat formatlama):** API'den gelen fiyatlar ham float
+  olarak (`0.001` gibi) basılıyordu, hem okunması zor hem 2 basamağa
+  yuvarlansa "0.00" gösterip yanıltıcı olurdu. `MoneyHelper` tutarı, kaç
+  basamak gerektiğine bakıp (2-4 arası) TR'de `1.234,56 ₺`, EN'de
+  `1,234.56 ₺` formatında basıyor. `intl` eklentisini bilerek kullanmadım
+  çünkü Docker imajında yüklü değil, ek kurulum gerektirmesin diye elle
+  (`number_format`) yazdım.
+- **`Logger` (API hata kaydı):** Dockerfile zaten `storage/logs` klasörünü
+  oluşturuyordu ama hiçbir şey oraya yazmıyordu — yani API'den bir hata
+  dönse bile hiçbir iz kalmıyordu. `TurkpinApiClient` içindeki ağ hatalarını
+  ve API'nin döndürdüğü hata kodlarını `storage/logs/api.log`'a yazacak
+  şekilde bağladım.
+- **`APP_DEBUG`:** `.env.example`'da bu değişken tanımlıydı ama kodun hiçbir
+  yerinde okunmuyordu, yani hiçbir işlevi yoktu. `index.php`'de bu değere
+  göre `display_errors`/`error_reporting`'i açıp kapatacak şekilde bağladım
+  — geliştirirken hatayı görüyorum, canlıda kullanıcıya stack trace
+  sızmıyor.
+- **Marka renkleri ve rozet/buton tasarımı:** Sayfa saf Bootstrap'ti,
+  Turkpin'le hiçbir görsel bağı yoktu. turkpin.com'daki kırmızı tonu
+  (`#EF1414`) CSS değişkeni olarak tanımlayıp Bootstrap'in kendi
+  değişkenlerine bağladım. Bootstrap'in hazır rozetleri de (`text-bg-info`
+  açık mavi zemine siyah yazı, `text-bg-danger` markanın kırmızısıyla
+  çakışıyordu) kontrastı zayıf ve markaya uymuyordu; kendi yumuşak zeminli
+  rozetlerimi yazdım. Dolu kırmızı "Satın Al" butonu da tabloda altı kez
+  tekrar edince "sil/uyarı" gibi okunuyordu, koyu zemine çevirip kırmızıyı
+  sadece hover'da vurgu olarak bıraktım.
+- **PHPUnit testleri (21 test):** `OrderValidator`'ın min/max/stok
+  kurallarını, `TurkpinApiClient`'ın XML parse mantığını (API'nin iki farklı
+  hata formatını da), servislerin API cevabını array'e çevirme mantığını ve
+  `MoneyHelper`'ı test ediyor. `ProductService`'teki ölü kodu da bu testi
+  yazarken buldum — yani testler sadece "güvence" değil, fiilen bug da
+  yakaladı. Çalıştırmak için: `vendor/bin/phpunit`.
+- **Docker:** `.env`'i doldurup `docker compose up -d --build` demek
+  yeterli olsun diye Dockerfile + docker-compose ekledim; credential
+  kaynak kodda değil sadece `.env`'de duruyor, o dosya da `.gitignore`'da.
